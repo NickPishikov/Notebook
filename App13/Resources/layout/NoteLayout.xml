@@ -1,0 +1,75 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+   >
+
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/toptable">
+    <Button
+        android:text="Settings"
+        android:id="@+id/settingsbut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+
+    
+   />
+        
+    <Button
+        android:text="Save"
+            android:id="@+id/savebut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+     />
+      
+    </RelativeLayout
+                    >
+       
+ <ScrollView
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:layout_below="@+id/toptable"
+       android:layout_above="@+id/botpanel">
+    <EditText       
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText1"
+        android:gravity="top"
+        android:hint="Type some text here"
+        
+        
+        android:background="@android:color/transparent"
+ 	/>
+    </ScrollView>
+<RelativeLayout
+    android:fitsSystemWindows="true"
+    android:id="@+id/botpanel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+        >
+   <Button
+        android:text="Settings"
+        android:id="@+id/but1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+   />
+    <Button
+        android:text="Save" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+   />
+  </RelativeLayout>
+
+</RelativeLayout>
