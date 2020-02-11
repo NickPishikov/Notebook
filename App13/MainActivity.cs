@@ -68,7 +68,7 @@ namespace App13
              {
                  Intent intent = new Intent(this, typeof(WriteActivity));
                  intent.PutExtra("_id", cursorAdapter.GetItemId(e.Position).ToString());
-                 StartActivity(intent);
+                 StartActivityForResult(intent,REQUEST_RETURN_NOTE);
              };
             //listeners
         }
@@ -96,7 +96,7 @@ namespace App13
                 {
                     cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
                     
-                    //cursor = db.RawQuery("select * from " + Databasehelper.TEXTTABLE, null);
+                    //cursor = db.RawQuery("select * from " + Databasehelper. TEXTTABLE, null);
                     cursorAdapter.ChangeCursor(cursor);
                    //ursorAdapter.NotifyDataSetChanged();
                     //START ACTIVITY
@@ -114,4 +114,6 @@ namespace App13
         }
     }
 }
+
+
 
