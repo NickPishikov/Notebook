@@ -4,20 +4,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content" >
-
+    android:layout_height="wrap_content" 
+    android:orientation="horizontal"
+    >
  
-    <TextView
+  <!--   <CheckedTextView
+         
         android:id="@+id/namenote"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:text=""
         android:singleLine="true"
-        android:maxLength="30"
+        android:maxLength="10"
         android:ellipsize="end"
         android:textSize="@dimen/abc_text_size_display_2_material"
+        android:layout_weight="1"
+     
     >
-    </TextView>
-
+    </CheckedTextView>-->
+    <CheckBox
+        android:id="@+id/namenote"
+        android:layout_weight="0.1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    android:visibility="invisible"
+    android:focusable="false"
+    android:focusableInTouchMode="false"/>
+        
 </LinearLayout>

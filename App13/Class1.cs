@@ -9,10 +9,11 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Android.Database;
 using System;
 namespace App13
 {
-  static  class Multitools
+    static class Multitools
     {
         private static int calculateInSampleSize(
              BitmapFactory.Options options, int reqWidth, int reqHeight)
@@ -69,7 +70,7 @@ namespace App13
 
             return bitmap;
         }
-        public static  Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight)
+        public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight)
         {
             int width = bm.Width;
             int height = bm.Height;
@@ -86,7 +87,7 @@ namespace App13
             bm.Recycle();
             return resizedBitmap;
         }
-        public static byte[] ConvertoBLob( ref Bitmap image)
+        public static byte[] ConvertoBLob(ref Bitmap image)
         {
             MemoryStream stream = new MemoryStream();
 
@@ -96,10 +97,53 @@ namespace App13
         }
         public static Bitmap ConvertToBitmap(byte[] bytearray)
         {
-            
+
             Bitmap BitmapResult = BitmapFactory.DecodeByteArray(bytearray, 0, bytearray.Length);
             return BitmapResult;
         }
     }
-     
+    class Listadapter : SimpleCursorAdapter
+    {
+        bool IsShow;
+        bool[] IsChecked;
+        CheckBox checkbox;
+        public Listadapter(Context context, int layout, ICursor c, string[] from, int[] to, [GeneratedEnum] CursorAdapterFlags flags) : base(context, layout, c, from, to, flags)
+        {
+            IsChecked = new bool[Cursor.Count];
+        }
+        public override void BindView(View view, Context context, ICursor cursor)
+        {
+            base.BindView(view, context, cursor);
+            checkbox = (CheckBox)view.FindViewById(Resource.Id.namenote);
+            if (IsShow)
+            {
+                checkbox.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                checkbox.Visibility = ViewStates.Invisible;
+            }
+
+            if (IsShow) checkbox.Checked=IsChecked[cursor.Position];
+            checkbox.Click += (sender, e) =>
+            {
+                IsChecked[cursor.Position] = !IsChecked[cursor.Position];
+
+            };
+
+        }
+        public bool[] getChecked()
+        {
+            return IsChecked;
+
+        }
+        public void IsShowCheckbox(bool show)
+        {
+
+            IsShow = show;
+            if (IsShow) System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
+            this.ChangeCursor(Cursor);
+            NotifyDataSetChanged();
+        }
+    }
 }

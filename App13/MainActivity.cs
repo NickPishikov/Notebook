@@ -34,10 +34,10 @@ namespace App13
         Databasehelper sqlHelper;
         SQLiteDatabase db;
         Button addToList;
-        SimpleCursorAdapter cursorAdapter;
+        Listadapter cursorAdapter;
         ICursor cursor;
         ListView list;
-        
+        CheckBox checknotes;
         private const int REQUEST_RETURN_NOTE = 1; //Возвращаемое значение текста
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -47,9 +47,11 @@ namespace App13
             SetContentView(Resource.Layout.activity_main);
             addToList = FindViewById<Button>(Resource.Id.notebut);
             list = (ListView)FindViewById(Resource.Id.values);
+            
             //views
             sqlHelper = new Databasehelper(this);
             db = sqlHelper.ReadableDatabase;
+            
             //sql
             //getcursor
 
@@ -59,16 +61,22 @@ namespace App13
             string[] headers = new string[] {Databasehelper.COLUMN_TEXT}; //used columns in note
             
            
-            cursorAdapter = new SimpleCursorAdapter(this, Resource.Layout.activity_rows,
-                             cursor,headers, new int[] { Resource.Id.namenote }, 0);
-            
+            cursorAdapter = new Listadapter(this, Resource.Layout.activity_rows,
+                             cursor,headers, new int[] { Resource.Id.namenote}, 0);
+           
             list.Adapter = cursorAdapter;
+           
             addToList.Click += addToListClick;
             list.ItemClick += (sender, e) =>
              {
                  Intent intent = new Intent(this, typeof(WriteActivity));
                  intent.PutExtra("_id", cursorAdapter.GetItemId(e.Position).ToString());
                  StartActivityForResult(intent,REQUEST_RETURN_NOTE);
+                 
+             };
+            list.ItemLongClick += (sender, e) =>
+             {
+                 cursorAdapter.IsShowCheckbox(true);
              };
             //listeners
         }
