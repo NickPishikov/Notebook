@@ -119,8 +119,9 @@ namespace App13
         }
         public override void BindView(View view, Context context, ICursor cursor)
         {
-            
+          
             base.BindView(view, context, cursor);
+           
             textbox = (TextView)view.FindViewById(Resource.Id.namenote);
             checkbox = (CheckBox)view.FindViewById(Resource.Id.checknote);
 
@@ -194,9 +195,10 @@ namespace App13
         }
         public void IsShowCheckbox(bool show)
         {
-
+          
             IsShow = show;
-             System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
+            if (!IsShow) IsChecked = new bool[Cursor.Count];
+            System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
             this.ChangeCursor(Cursor);
             NotifyDataSetChanged();
         }

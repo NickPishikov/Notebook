@@ -83,11 +83,17 @@ namespace App13
                   {
                       db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id=" + checkedpos[i].ToString());
                       db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
-                      for (int j = i + 1; i < checkedpos.Count; i++)
+                      for (int j = i + 1; j < checkedpos.Count; j++)
                       {
                           checkedpos[j] = checkedpos[j] - 1;
                       }
                   }
+                  cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
+                  cursorAdapter.ChangeCursor(cursor);
+                  cursorAdapter.IsShowCheckbox(false);
+                  DeleteBut.Visibility = ViewStates.Invisible;
+                  CancelBut.Visibility = ViewStates.Invisible;
+                  addToList.Visibility = ViewStates.Visible;
               };
             addToList.Click += addToListClick;
             list.ItemClick += (sender, e) =>
