@@ -104,9 +104,10 @@ namespace App13
     }
     class Listadapter : SimpleCursorAdapter
     {
-        bool IsShow;
-        bool[] IsChecked;
+       public bool IsShow;
+       public bool[] IsChecked;
         CheckBox checkbox;
+        TextView textbox;
         public Listadapter(Context context, int layout, ICursor c, string[] from, int[] to, [GeneratedEnum] CursorAdapterFlags flags) : base(context, layout, c, from, to, flags)
         {
             IsChecked = new bool[Cursor.Count];
@@ -114,7 +115,8 @@ namespace App13
         public override void BindView(View view, Context context, ICursor cursor)
         {
             base.BindView(view, context, cursor);
-            checkbox = (CheckBox)view.FindViewById(Resource.Id.namenote);
+            checkbox = (CheckBox)view.FindViewById(Resource.Id.checknote);
+            textbox = (TextView)view.FindViewById(Resource.Id.namenote);
             if (IsShow)
             {
                 checkbox.Visibility = ViewStates.Visible;
@@ -125,6 +127,7 @@ namespace App13
             }
 
             if (IsShow) checkbox.Checked=IsChecked[cursor.Position];
+            if(!checkbox.HasOnClickListeners)
             checkbox.Click += (sender, e) =>
             {
                 IsChecked[cursor.Position] = !IsChecked[cursor.Position];
@@ -143,6 +146,11 @@ namespace App13
             IsShow = show;
             if (IsShow) System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
             this.ChangeCursor(Cursor);
+            NotifyDataSetChanged();
+        }
+        public void ChangeChecked (int position)
+        {
+            IsChecked[position] = !IsChecked[position];
             NotifyDataSetChanged();
         }
     }

@@ -69,10 +69,16 @@ namespace App13
             addToList.Click += addToListClick;
             list.ItemClick += (sender, e) =>
              {
-                 Intent intent = new Intent(this, typeof(WriteActivity));
-                 intent.PutExtra("_id", cursorAdapter.GetItemId(e.Position).ToString());
-                 StartActivityForResult(intent,REQUEST_RETURN_NOTE);
-                 
+                 if (cursorAdapter.IsShow)
+                 {
+                     cursorAdapter.ChangeChecked(e.Position);
+                 }
+                 else
+                 {
+                     Intent intent = new Intent(this, typeof(WriteActivity));
+                     intent.PutExtra("_id", cursorAdapter.GetItemId(e.Position).ToString());
+                     StartActivityForResult(intent, REQUEST_RETURN_NOTE);
+                 }
              };
             list.ItemLongClick += (sender, e) =>
              {
