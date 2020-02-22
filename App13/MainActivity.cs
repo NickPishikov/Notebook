@@ -59,7 +59,7 @@ namespace App13
             //sql
             //getcursor
 
-            cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
+            cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, rowid from " + Databasehelper.TEXTTABLE, null);
 
 
             string[] headers = new string[] {Databasehelper.COLUMN_TEXT}; //used columns in note
@@ -81,14 +81,18 @@ namespace App13
                   List<int> checkedpos = cursorAdapter.GetChecked();
                   for (int i = 0; i < checkedpos.Count; i++)
                   {
-                      db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id=" + checkedpos[i].ToString());
+                      
+                      db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id == " + checkedpos[i].ToString());
                       db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
                       for (int j = i + 1; j < checkedpos.Count; j++)
                       {
                           checkedpos[j] = checkedpos[j] - 1;
                       }
+                   //   cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
+                      
                   }
-                  cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
+                  
+                  cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
                   cursorAdapter.ChangeCursor(cursor);
                   cursorAdapter.IsShowCheckbox(false);
                   DeleteBut.Visibility = ViewStates.Invisible;

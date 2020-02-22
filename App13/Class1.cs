@@ -106,106 +106,155 @@ namespace App13
     }
     class Listadapter : SimpleCursorAdapter
     {
-       public bool IsShow;
-       public bool[] IsChecked;
+      public  static int id = 1;
+        public bool IsShow;
+        public bool[] IsChecked;
         CheckBox checkbox;
         TextView textbox;
         int Position;
         ICursor cursor1;
+        Context context;
         public Listadapter(Context context, int layout, ICursor c, string[] from, int[] to, [GeneratedEnum] CursorAdapterFlags flags) : base(context, layout, c, from, to, flags)
         {
+            this.context = context;
             IsChecked = new bool[Cursor.Count];
             cursor1 = c;
         }
-        public override void BindView(View view, Context context, ICursor cursor)
-        {
-          
-            base.BindView(view, context, cursor);
-           
-            textbox = (TextView)view.FindViewById(Resource.Id.namenote);
-            checkbox = (CheckBox)view.FindViewById(Resource.Id.checknote);
+        //public override void BindView(View view, Context context, ICursor cursor)
+        //{
 
-            int position = (int)view.GetTag(view.Id);
-            
-            if (IsShow)
+        //    base.BindView(view, context, cursor);
+
+        //    textbox = (TextView)view.FindViewById(Resource.Id.namenote);
+        //    checkbox = (CheckBox)view.FindViewById(Resource.Id.checknote);
+
+        //    int position = (int)view.GetTag(view.Id);
+
+        //    if (IsShow)
+        //    {
+        //        checkbox.Visibility = ViewStates.Visible;
+        //    }
+        //    else
+        //    {
+        //        checkbox.Visibility = ViewStates.Invisible;
+        //    }
+
+        //    if (IsShow) checkbox.Checked=IsChecked[position];
+        //    if(!checkbox.HasOnClickListeners)
+        //    checkbox.Click += (sender, e) =>
+        //    {
+        //        IsChecked[position] = !IsChecked[position];
+
+        //    };
+
+        //}
+        public override View GetView(int position, View convertView, ViewGroup parent)
+        {
+            base.GetView(position, convertView, parent);
+            ViewHolder viewHolder;
+
+
+            if (convertView == null)
             {
-                checkbox.Visibility = ViewStates.Visible;
+                convertView = View.Inflate(context, Resource.Layout.activity_rows, null);
+                Cursor.MoveToPosition(position);
+                
+                viewHolder = new ViewHolder(convertView);
+                viewHolder.namenotes.Text= Cursor.GetString(Cursor.GetColumnIndex("ColumnText"));
+                convertView.Tag = viewHolder;
             }
             else
             {
-                checkbox.Visibility = ViewStates.Invisible;
+                viewHolder = (ViewHolder)convertView.Tag;
+            }
+               // viewHolder.namenotes=
+                
+
+
+
+
+            if (IsShow)
+            {
+                viewHolder.checkBox.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                viewHolder.checkBox.Visibility = ViewStates.Invisible;
             }
 
-            if (IsShow) checkbox.Checked=IsChecked[position];
-            if(!checkbox.HasOnClickListeners)
-            checkbox.Click += (sender, e) =>
+            if (IsShow) viewHolder.checkBox.Checked = IsChecked[position];
+            if (!viewHolder.checkBox.HasOnClickListeners)
+                viewHolder.checkBox.Click += (sender, e) =>
+                {
+                    IsChecked[position] = !IsChecked[position];
+                   
+                };
+            return convertView;
+        }
+        
+        private class ViewHolder : Java.Lang.Object
+        {
+
+           public TextView namenotes;
+           public CheckBox checkBox;
+            public ViewHolder(View view)
+            {
+                namenotes = (TextView)view.FindViewById(Resource.Id.namenote);
+                checkBox = (CheckBox)view.FindViewById(Resource.Id.checknote);
+
+            }
+        }
+            //public override View NewView(Context context, ICursor cursor, ViewGroup parent)
+            //{
+            //    //base.GetView(position, convertView, parent);
+            //    View v;
+
+
+            //        LayoutInflater vi;
+            //        vi = LayoutInflater.From(parent.Context);
+            //        v = vi.Inflate(Resource.Layout.activity_rows,parent,false);
+
+
+
+            //    v.SetTag(v.Id, Cursor.posi);
+            //    // BindView(v, parent.Context, cursor1);
+            //   //NotifyDataSetChanged();
+
+
+
+
+
+            //    return v;
+
+            //}
+
+            public List<int> GetChecked()
+            {
+                List<int> checkedpos = new List<int>();
+                for (int i = 0; i < IsChecked.Length; i++)
+                {
+                    if (IsChecked[i])
+                    {
+                        checkedpos.Add(i + 1);
+                    }
+                }
+            NotifyDataSetChanged();
+            return checkedpos;
+            
+        }
+            public void IsShowCheckbox(bool show)
+            {
+
+                IsShow = show;
+                if (IsShow) IsChecked = new bool[Cursor.Count];
+                System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
+                this.ChangeCursor(Cursor);
+                NotifyDataSetChanged();
+            }
+            public void ChangeChecked(int position)
             {
                 IsChecked[position] = !IsChecked[position];
-
-            };
-
-        }
-        public override View NewView(Context context, ICursor cursor, ViewGroup parent)
-        {
-            //base.GetView(position, convertView, parent);
-            View v;
-           
-           
-                LayoutInflater vi;
-                vi = LayoutInflater.From(parent.Context);
-                v = vi.Inflate(Resource.Layout.activity_rows,parent,false);
-
-            
-            
-            v.SetTag(v.Id, cursor.Position);
-            // BindView(v, parent.Context, cursor1);
-           //NotifyDataSetChanged();
-
-
-
-
-
-            return v;
-
-        }
-        private class ViewHolder
-        {
-
-            TextView textbox;
-            CheckBox checkbox;
-           public ViewHolder(View view)
-            {
-               
-                checkbox = (CheckBox)view.FindViewById(Resource.Id.checkbox);
-                textbox = (TextView)view.FindViewById(Resource.Id.namenote);
+                NotifyDataSetChanged();
             }
-        }
-            public List <int> GetChecked()
-        {
-            List<int> checkedpos = new List<int>();
-            for (int i = 0; i < IsChecked.Length; i++)
-            {
-                if (IsChecked[i])
-                {
-                    checkedpos.Add(i+1);
-                }
-            }
-            return checkedpos;
-
-        }
-        public void IsShowCheckbox(bool show)
-        {
-          
-            IsShow = show;
-            if (!IsShow) IsChecked = new bool[Cursor.Count];
-            System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
-            this.ChangeCursor(Cursor);
-            NotifyDataSetChanged();
-        }
-        public void ChangeChecked (int position)
-        {
-            IsChecked[position] = !IsChecked[position];
-            NotifyDataSetChanged();
         }
     }
-}

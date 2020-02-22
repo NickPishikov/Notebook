@@ -58,8 +58,8 @@ namespace App13
             Args = Intent.Extras;
             if (Args != null)
             {
-                cursor= Db.RawQuery("Select * from "+ Databasehelper.TEXTTABLE +" Where _id == "
-                    +Args.GetString(Databasehelper.COLUMN_ID), null);
+                cursor= Db.RawQuery("Select * from "+ Databasehelper.TEXTTABLE + " Where _id =="
+                    + Args.GetString(Databasehelper.COLUMN_ID), null);
                 cursor.MoveToFirst();
                 string text= cursor.GetString(cursor.GetColumnIndex("ColumnText"));
                 EditText.Text = cursor.GetString(cursor.GetColumnIndex("ColumnText")); 
@@ -80,13 +80,32 @@ namespace App13
             {
                 ContentValues cv = new ContentValues();
                 cv.Put(Databasehelper.COLUMN_TEXT, EditText.EditableText.ToString());
+                
                 if (Args != null)
                 {
                     Db.Update(Databasehelper.TEXTTABLE, cv, "_id == ?", new string[] { Args.GetString(Databasehelper.COLUMN_ID) });
                 }
                 else
                 {
-                    Db.Insert(Databasehelper.TEXTTABLE, null, cv);
+                    long id;
+                    
+                    
+                     cursor = Db.RawQuery("Select _id from " + Databasehelper.TEXTTABLE + " ORDER BY _id DESC LIMIT 1",null);
+                    if (cursor.MoveToFirst())
+                    {
+                        id = cursor.GetLong(cursor.GetColumnIndex("_id"));
+                        id++;
+                    }
+                    else
+                    {
+                        id = 1;
+                    }
+                    
+                 
+                 
+                    cv.Put(Databasehelper.COLUMN_ID, id);
+                   Db.Insert(Databasehelper.TEXTTABLE, null, cv);
+                    cursor.Close();
                 }
                 SetResult(Result.Ok);
             }
