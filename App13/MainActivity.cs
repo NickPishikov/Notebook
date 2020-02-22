@@ -34,6 +34,8 @@ namespace App13
         Databasehelper sqlHelper;
         SQLiteDatabase db;
         Button addToList;
+        Button CancelBut;
+        Button DeleteBut;
         Listadapter cursorAdapter;
         ICursor cursor;
         ListView list;
@@ -46,6 +48,8 @@ namespace App13
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
             addToList = FindViewById<Button>(Resource.Id.notebut);
+            CancelBut =(Button) FindViewById(Resource.Id.CancelBut);
+            DeleteBut = (Button)FindViewById(Resource.Id.DeleteBut);
             list = (ListView)FindViewById(Resource.Id.values);
             
             //views
@@ -65,13 +69,34 @@ namespace App13
                              cursor,headers, new int[] { Resource.Id.namenote}, 0);
            
             list.Adapter = cursorAdapter;
-           
+            CancelBut.Click += (sender, e) =>
+            {
+                cursorAdapter.IsShowCheckbox(false);
+                CancelBut.Visibility = ViewStates.Invisible;
+                DeleteBut.Visibility = ViewStates.Invisible;
+                addToList.Visibility = ViewStates.Visible;
+            };
+            DeleteBut.Click += (sender, e) =>
+              {
+                  List<int> checkedpos = cursorAdapter.GetChecked();
+                  for (int i = 0; i < checkedpos.Count; i++)
+                  {
+                      db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id=" + checkedpos[i].ToString());
+                      db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
+                      for (int j = i + 1; i < checkedpos.Count; i++)
+                      {
+                          checkedpos[j] = checkedpos[j] - 1;
+                      }
+                  }
+              };
             addToList.Click += addToListClick;
             list.ItemClick += (sender, e) =>
              {
+
                  if (cursorAdapter.IsShow)
                  {
                      cursorAdapter.ChangeChecked(e.Position);
+                     
                  }
                  else
                  {
@@ -82,6 +107,9 @@ namespace App13
              };
             list.ItemLongClick += (sender, e) =>
              {
+                 addToList.Visibility = ViewStates.Invisible;
+                 CancelBut.Visibility = ViewStates.Visible;
+                 DeleteBut.Visibility = ViewStates.Visible; 
                  cursorAdapter.IsShowCheckbox(true);
              };
             //listeners

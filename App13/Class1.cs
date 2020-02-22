@@ -179,16 +179,24 @@ namespace App13
                 textbox = (TextView)view.FindViewById(Resource.Id.namenote);
             }
         }
-            public bool[] getChecked()
+            public List <int> GetChecked()
         {
-            return IsChecked;
+            List<int> checkedpos = new List<int>();
+            for (int i = 0; i < IsChecked.Length; i++)
+            {
+                if (IsChecked[i])
+                {
+                    checkedpos.Add(i+1);
+                }
+            }
+            return checkedpos;
 
         }
         public void IsShowCheckbox(bool show)
         {
 
             IsShow = show;
-            if (IsShow) System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
+             System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
             this.ChangeCursor(Cursor);
             NotifyDataSetChanged();
         }

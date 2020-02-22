@@ -21,6 +21,20 @@
         android:id="@+id/notebut"
         
     />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+        android:text="@android:string/cancel"
+        android:visibility="invisible"
+         android:id="@+id/CancelBut"/>
+        <Button
+            android:id="@+id/DeleteBut"
+          android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            android:visibility="invisible"
+            android:layout_alignParentRight="true"    
+            />
     <Button
        android:layout_alignParentRight="true"    
         android:layout_width="wrap_content"
