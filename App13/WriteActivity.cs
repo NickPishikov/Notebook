@@ -44,13 +44,13 @@ namespace App13
             SaveBut = FindViewById<Button>(Resource.Id.savebut);
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             //setviews
-
+           
             SqlHelper = new Databasehelper(this);
             Db = SqlHelper.WritableDatabase;
               
             SettingsBut.Click += OnImageclick;
             SaveBut.Click += OnSaveClick;
-            EditText.MovementMethod = new ScrollingMovementMethod();
+           
             EditText.SetPadding(40, 10, 40, 10);
 
             EditText.BeforeTextChanged += BeforeTextChanged;

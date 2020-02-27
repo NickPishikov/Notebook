@@ -1,5 +1,4 @@
-﻿//savestext
-//deleting notes
+﻿//graphical parts
 //savesbitmaps
 
 
