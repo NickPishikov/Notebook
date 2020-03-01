@@ -32,7 +32,7 @@ namespace App13
         SQLiteDatabase Db;
         ICursor cursor;
         Button SettingsBut;
-        Button SaveBut;
+        ImageButton SaveBut;
         private Bundle Args;
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -41,7 +41,7 @@ namespace App13
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.NoteLayout);
             SettingsBut = FindViewById<Button>(Resource.Id.settingsbut);
-            SaveBut = FindViewById<Button>(Resource.Id.savebut);
+            SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             //setviews
            
@@ -70,7 +70,7 @@ namespace App13
         void OnSaveClick(object sender, EventArgs e) //SAVENOTES
         {
             string str = EditText.EditableText.ToString().Trim();
-          
+            SaveBut.SetColorFilter(Color.ParseColor("#122343"));
 
             if (str.Length == 0)
             {
