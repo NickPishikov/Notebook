@@ -14,12 +14,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/toptable"
+      
         >
-    <Button
-        android:text="Settings"
+    <ImageButton
+        android:src="@drawable/setimg"
         android:id="@+id/settingsbut"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+            android:layout_width="35dp"
+            android:layout_height="45dp"
+             android:scaleType="fitXY"
+         android:background="@null"
+           android:tint="@drawable/default_button_selector"
         android:layout_alignParentLeft="true"
 
     
@@ -27,9 +31,9 @@
         
     <ImageButton
         
-      android:src="@drawable/acceptimg"
-          android:layout_width="30dp"
-            android:layout_height="30dp"
+      android:src="@drawable/accept"
+          android:layout_width="35dp"
+            android:layout_height="45dp"
             android:id="@+id/savebut"
       android:scaleType="fitXY"
          android:background="@null"

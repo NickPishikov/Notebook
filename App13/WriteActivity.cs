@@ -2,18 +2,11 @@
 using Android.App;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.Design.Widget;
-using Android.Support.V7.App;
-using Android.Views;
 using Android.Widget;
 using Android.Text;
 using Android.Text.Style;
-using Android.Graphics.Drawables;
 using Android.Content;
-using Android.Provider;
 using Android.Graphics;
-using Android.Media;
-using Android.Text.Method;
 using Android.Database;
 using Android.Database.Sqlite;
 
@@ -31,7 +24,7 @@ namespace App13
         Databasehelper SqlHelper;
         SQLiteDatabase Db;
         ICursor cursor;
-        Button SettingsBut;
+        ImageButton SettingsBut;
         ImageButton SaveBut;
         private Bundle Args;
         protected override void OnCreate(Bundle savedInstanceState)
@@ -40,7 +33,7 @@ namespace App13
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.NoteLayout);
-            SettingsBut = FindViewById<Button>(Resource.Id.settingsbut);
+            SettingsBut = FindViewById<ImageButton>(Resource.Id.settingsbut);
             SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             //setviews
@@ -70,7 +63,7 @@ namespace App13
         void OnSaveClick(object sender, EventArgs e) //SAVENOTES
         {
             string str = EditText.EditableText.ToString().Trim();
-            SaveBut.SetColorFilter(Color.ParseColor("#122343"));
+            
 
             if (str.Length == 0)
             {

@@ -6,34 +6,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:fitsSystemWindows="true"
+ 
  >
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    <Button
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+"
+        android:gravity="top">
+    <ImageButton
+         android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginLeft="3dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/plusimg"
         android:id="@+id/notebut"
-        
+            android:background="@null"
+             android:tint="@drawable/default_button_selector"
+         
+    
     />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-        android:text="@android:string/cancel"
+        <ImageButton
+         
+            android:layout_width="25dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginLeft="3dp"
+            android:scaleType="fitXY"
+        android:src="@drawable/cancel"
         android:visibility="invisible"
-         android:id="@+id/CancelBut"/>
-        <Button
+             android:background="@null"
+             android:tint="@drawable/default_button_selector"
+         android:id="@+id/CancelBut"
+            
+        />
+        <ImageButton
+              android:layout_width="25dp"
+              android:layout_height="30dp"
+             android:layout_marginTop="6dp"
+            android:layout_marginRight="3dp"
             android:id="@+id/DeleteBut"
-          android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Delete"
+         android:src="@drawable/deleteimg"
+    android:scaleType="fitXY"
+            android:background="@null"
             android:visibility="invisible"
-            android:layout_alignParentRight="true"    
+            android:layout_alignParentRight="true" 
+            android:tint="@drawable/default_button_selector"
             />
     <Button
        android:layout_alignParentRight="true"    

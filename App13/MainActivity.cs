@@ -7,24 +7,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Android.App;
 using Android.OS;
-
 using Android.Runtime;
-using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using Android.Text;
-using Android.Text.Style;
-using Android.Graphics.Drawables;
 using Android.Content;
-using Android.Provider;
-using Android.Graphics;
-using Android.Media;
-using Android.Text.Method;
-using Android;
 using Android.Database;
 using Android.Database.Sqlite;
-using Android.Util;
+
 namespace App13
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
@@ -32,9 +22,9 @@ namespace App13
     {
         Databasehelper sqlHelper;
         SQLiteDatabase db;
-        Button addToList;
-        Button CancelBut;
-        Button DeleteBut;
+        ImageButton addToList;
+        ImageButton CancelBut;
+        ImageButton DeleteBut;
         Listadapter cursorAdapter;
         ICursor cursor;
         ListView list;
@@ -46,9 +36,9 @@ namespace App13
            
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
-            addToList = FindViewById<Button>(Resource.Id.notebut);
-            CancelBut =(Button) FindViewById(Resource.Id.CancelBut);
-            DeleteBut = (Button)FindViewById(Resource.Id.DeleteBut);
+            addToList = FindViewById<ImageButton>(Resource.Id.notebut);
+            CancelBut =(ImageButton)FindViewById(Resource.Id.CancelBut);
+            DeleteBut = (ImageButton)FindViewById(Resource.Id.DeleteBut);
             list = (ListView)FindViewById(Resource.Id.values);
             
             //views
@@ -129,14 +119,7 @@ namespace App13
             Intent intent = new Intent(this, typeof(WriteActivity));
         
             StartActivityForResult(intent,REQUEST_RETURN_NOTE);
-            //ВАЖНО!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //db = sqlHelper.WritableDatabase;
-            //ContentValues cv = new ContentValues();
-            //cv.Put(Databasehelper.COLUMN_TEXT, "dwadwa");
-            //db.Insert(Databasehelper.TEXTTABLE, null, cv);
-            //cursor = db.RawQuery("select * from " + Databasehelper.TEXTTABLE, null);
-            //cursorAdapter.ChangeCursor(cursor);
-            //cursorAdapter.NotifyDataSetChanged();
+          
         }
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
