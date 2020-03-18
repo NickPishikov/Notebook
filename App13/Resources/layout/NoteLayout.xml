@@ -19,8 +19,10 @@
     <ImageButton
         android:src="@drawable/setimg"
         android:id="@+id/settingsbut"
-            android:layout_width="35dp"
-            android:layout_height="45dp"
+           android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginRight="3dp"
              android:scaleType="fitXY"
          android:background="@null"
            android:tint="@drawable/default_button_selector"
@@ -32,8 +34,10 @@
     <ImageButton
         
       android:src="@drawable/accept"
-          android:layout_width="35dp"
-            android:layout_height="45dp"
+          android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginRight="3dp"
             android:id="@+id/savebut"
       android:scaleType="fitXY"
          android:background="@null"

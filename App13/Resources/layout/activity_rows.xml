@@ -6,29 +6,24 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" 
     android:orientation="horizontal"
+     android:background="@drawable/gradient"
+   
     >
  
-  <!--   <CheckedTextView
-         
-        android:id="@+id/namenote"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text=""
-        android:singleLine="true"
-        android:maxLength="10"
-        android:ellipsize="end"
-        android:textSize="@dimen/abc_text_size_display_2_material"
-        android:layout_weight="1"
-     
-    >
-    </CheckedTextView>-->
+
+   
     <TextView
         android:id="@+id/namenote"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:singleLine="true"
        android:layout_weight="1"
+      
+     android:textStyle="bold"
+       android:textColor="@android:color/black"
+       
+     android:textAlignment="center"
+        android:paddingVertical="20dp"
         />
     <CheckBox
         android:id="@+id/checknote"
@@ -39,6 +34,7 @@
     android:visibility="invisible"
     android:focusable="false"
     android:focusableInTouchMode="false"
+       
     android:gravity ="right"/>
         
 </LinearLayout>

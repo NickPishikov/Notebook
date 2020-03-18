@@ -6,7 +6,7 @@
 
   
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
-  <application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/AppTheme">
+  <application android:allowBackup="true" android:icon="@mipmap/accept" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/AppTheme">
     <activity
        android:name="activity_main"
      
