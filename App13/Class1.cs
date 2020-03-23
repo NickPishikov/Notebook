@@ -1,16 +1,12 @@
 ﻿using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Android.Graphics;
-using Android.App;
 using Android.Content;
-using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.Database;
-using Android.Support.V7.Widget;
+
 
 using System;
 namespace App13
@@ -89,11 +85,12 @@ namespace App13
             bm.Recycle();
             return resizedBitmap;
         }
-        public static byte[] ConvertoBLob(ref Bitmap image)
+        public static byte[] ConvertoBLob( Bitmap image)
         {
             MemoryStream stream = new MemoryStream();
 
             image.Compress(Bitmap.CompressFormat.Png, 100, stream);
+            
             byte[] byteArray = stream.ToArray();
             return byteArray;
         }
@@ -104,6 +101,13 @@ namespace App13
             return BitmapResult;
         }
     }
+
+
+
+
+
+
+
     class Listadapter : SimpleCursorAdapter
     {
       public  static int id = 1;
