@@ -6,6 +6,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Widget;
 using Android.Text;
+using Java.Lang;
 using Android.Text.Style;
 using Android.Content;
 using Android.Graphics;
@@ -14,15 +15,17 @@ using Android.Database.Sqlite;
 using Android.Graphics.Drawables;
 using Android.Views;
 using Android.Text.Method;
+using Android.Views;
+using Android.Util;
+
+
 namespace App13
 {
     [Activity(Label = "WriteActivity")]
     public class WriteActivity : Activity
     {
    
-        int slend;
-        private bool Editing = true;
-        private bool IsEnd = false;
+       
         private EditText EditText;
         const int GALLERY_REQUEST = 1;
         Databasehelper SqlHelper;
@@ -31,9 +34,12 @@ namespace App13
         ImageButton SettingsBut;
         ImageButton SaveBut;
         private Bundle Args;
+        
+
         long NoteNumber = 0;
         public Dictionary<string, Drawable> Images { get; set; } = new Dictionary<string, Drawable>();
-        MyClickableSpan clickableSpan;
+
+    
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
@@ -45,13 +51,9 @@ namespace App13
             SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             //setviews
-             clickableSpan = new MyClickableSpan();
-            clickableSpan.Click += v =>
-            {
-                EditText a =(EditText) v;
+            
 
-                a.SetSelection(0);
-            };
+
             SqlHelper = new Databasehelper(this);
             Db = SqlHelper.WritableDatabase;
 
@@ -60,8 +62,10 @@ namespace App13
 
             EditText.SetPadding(40, 10, 40, 10);
 
-           EditText.BeforeTextChanged += BeforeTextChanged;
-           EditText.AfterTextChanged += AfterTextChanged;
+
+
+            EditText.AddTextChangedListener(new TextWatcher(EditText));
+
             Args = Intent.Extras;
             if (Args != null)
             {
@@ -82,25 +86,16 @@ namespace App13
 
                     }
                     while (cursor.MoveToNext());
-                    ImageGetter a = new ImageGetter(Images);
-                    var spannedFromHtml = Html.FromHtml(text, a, null);
-                    EditText.SetText(spannedFromHtml, EditText.BufferType.Editable);
+                 /*   ImageGetter a = new ImageGetter(Images)*/;
+                    //var spannedFromHtml = Html.FromHtml(text, a, null);
+                    //EditText.SetText(spannedFromHtml, EditText.BufferType.Editable);
                 }
                 else EditText.Text = text;
                 
 
             }
         }
-        private class MyClickableSpan : ClickableSpan
-        {
-            public Action<View> Click;
-
-            public override void OnClick(View widget)
-            {
-                if (Click != null)
-                    Click(widget);
-            }
-        }
+        
 
         void OnSaveClick(object sender, EventArgs e) //SAVENOTES
         {
@@ -177,142 +172,152 @@ namespace App13
                 case GALLERY_REQUEST:
                     if (resultCode == Result.Ok)
                     {
-                       //Добавление уникальных элементов в dictionary
+ 
                         Android.Net.Uri selectedImage = data.Data;
-                        string myHtml = "[<img src=" + selectedImage.LastPathSegment + " style=\"color: red\"/>]"; //HTML Tag
-                        string s = selectedImage.Query;
-                        bitmap = Multitools.decodeSampledBitmapFromUri(this, selectedImage, 2000, 2000); //Resize Bitmap
-                        bitmap = Multitools.getResizedBitmap(bitmap, 1010, 1000);
+                        string Tag ='['+ selectedImage.LastPathSegment+']';
+                        bitmap = Multitools.decodeSampledBitmapFromUri(this, selectedImage, 2000, 2000);
+                        bitmap = Multitools.getResizedBitmap(bitmap, 1000, 1000);
+                        var imageSpan = new ImageSpan(this, bitmap); //Find your drawable.
                        
-                        Drawable drawable = new BitmapDrawable(this.Resources, bitmap); //GET DRAWABLE
-                        
-                        if (!Images.ContainsKey(selectedImage.LastPathSegment))
-                            Images.Add(selectedImage.LastPathSegment, drawable);
-                        Images = Images.Select(item => new KeyValuePair<string, Drawable>(item.Key, item.Value)).Distinct().ToDictionary(item => item.Key, item => item.Value);
                         int selStart = EditText.SelectionEnd;
-                        ImageGetter a = new ImageGetter(Images);
-                       // SpannableString ss = new SpannableString("]");
-                        
-                        ISpannable span = SpannableFactory.Instance.NewSpannable(Html.FromHtml(myHtml, a, null));
-                        span.SetSpan("]", span.Length(), span.Length(), SpanTypes.ExclusiveExclusive);
-                        //ss.SetSpan(spannedFromHtml, 0, spannedFromHtml.Length(), SpanTypes.ExclusiveExclusive);
-                        //ISpannable sss = ((ISpannable)spannedFromHtml);
-                        span.SetSpan(clickableSpan, 0, span.Length(), SpanTypes.ExclusiveExclusive);
-                        
+                        var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
+                        for (int i = 0; i < span.Length; i++)
+                        {
+                            int end = EditText.EditableText.GetSpanEnd(span[i]);
+                            if (selStart == end)
+                            {
+                                EditText.EditableText.Insert(selStart, "\n");
+                                selStart=EditText.SelectionEnd;
+                            }
+
+
+                        }
+
+                            ISpannable spann = SpannableFactory.Instance.NewSpannable(Tag);
+                        spann.SetSpan(imageSpan, 0, Tag.Length, SpanTypes.ExclusiveExclusive);
+                        EditText.EditableText.Insert(selStart ,spann);
+                       EditText.EditableText.Insert(selStart + Tag.Length, "\n");
                        
-
-                       
-                        //ClickableSpan cs = new ClickableSpan() {
-
-                        // public void onClick(View v)
-                        //{
-                        //  //  Log.D("main", "textview clicked");
-                        //    Toast.MakeText(this, "textview clicked", ToastLength.Long).Show();
-                        //}
-                        //};
-                        EditText.EditableText.Insert(selStart, span);
-                        EditText.EditableText.Insert(selStart + 1, "\n");
-                        EditText.MovementMethod = LinkMovementMethod.Instance;//insert HTML tag
-                    //    EditText.EditableText.Insert(selStart,"\n");
-
-
 
                     }
                     break;
             }
 
         }
-        public void AfterTextChanged(Object Sender, EventArgs a)
-        {
-            if (IsEnd)
-            {
-                IsEnd = false;
-                Editing = false;
-
-                try
-                {
-                    EditText.EditableText.Insert(slend, "\n");
-                   // EditText.SetSelection(slend + 1);
-                }
-                catch
-                {
-                    EditText.EditableText.Insert(slend - 1, "\n");
-                }
-            }
-        }
-        public void BeforeTextChanged(Object Sender, EventArgs a)
-        {
-            try
-            {
-                
-              
-                var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
-               
-                
-                slend = EditText.SelectionEnd;
-                int g;
-                if (span != null && Editing)
-                {
-                    for (int i = 0; i < span.Length; i++)
-                    {
-                        int b = EditText.EditableText.GetSpanStart(span[i]);
-                        g = EditText.EditableText.GetSpanEnd(span[i]);
-                        if (b == slend)
-                        {
-                            Editing = false;
-                            EditText.EditableText.Insert(slend, "\n");
-                        }
-                        if (g == slend)
-                        {
-                            EditText.SetSelection(slend-1);
-                            Editing = false;
-                            IsEnd = true;
-                        }
-                    }
-                }
-                else
-                    return;
-            }
-            finally { Editing = true; }
-        }
-
-
        
 
-        public class ImageGetter : Java.Lang.Object, Html.IImageGetter
+
+        class TextWatcher : Java.Lang.Object, ITextWatcher
         {
-            Dictionary<string, Drawable> images;
-            Drawable image = null;
+            int slend;
+            int spanStart;
+            int spanEnd;
             
-            public ImageGetter(Dictionary<string, Drawable> images)
+            EditText EditText;
+            private bool Editing = true;
+            private bool IsEnd = false;
+         public   TextWatcher(EditText text)
             {
-                this.images=images;
+                EditText = text;
+            }
+            public void AfterTextChanged(IEditable a)
+            {
 
+                if (IsEnd)
+                {
+                    IsEnd = false;
+                    Editing = false;
+
+                    try
+                    {
+                        EditText.EditableText.Insert(slend, "\n");
+                        // EditText.SetSelection(slend + 1);
+                    }
+                    catch
+                    {
+                        EditText.EditableText.Insert(slend-1  , "\n");
+                    }
+                }
             }
 
-
-           
-
-            public Drawable GetDrawable(string source)
+            public void OnTextChanged(ICharSequence s, int start, int before, int count)
             {
-                //GetBitmap from Database;
 
-                image = images.GetValueOrDefault(source);
-              //  Drawable drawable = new BitmapDrawable(image); //GET DRAWABLE
-                image.SetBounds(0, 0, image.IntrinsicWidth, image.IntrinsicHeight);
 
-                return image;
-                //  Drawable d = getResources().getDrawable(id);
-                //  d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
+              
+                if (count<before && spanStart!=-1&&spanEnd>-1 )
+                {
+                    int startSpan = spanStart;
+                    int endSpan = spanEnd;
+                    if (startSpan < 0 || endSpan > EditText.EditableText.Length())
+                    {
+                        endSpan = EditText.EditableText.Length();
+                    }
+                    spanStart = -1;
+                    spanEnd = -1;
+                    EditText.EditableText.Replace(startSpan, endSpan, "");
+                }
 
             }
-
-            void IDisposable.Dispose()
+            public void BeforeTextChanged(ICharSequence s, int start, int count, int after)
             {
-                throw new NotImplementedException();
+                try
+                {
+                    //  TextChangedEventArgs eventArgs = (TextChangedEventArgs)a;
+
+                    if (start == 0) return;
+                    var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
+                    spanStart = -1;
+                    spanEnd = -1;
+                    int end;
+                    slend = EditText.SelectionEnd;
+
+                    
+                    if (span != null && Editing)
+                    {
+                        if (count >after)
+                        {
+
+                            for (int i = 0; i < span.Length; i++)
+                            {
+                                end =EditText.EditableText.GetSpanEnd(span[i]);
+                                if (slend != end) continue;
+                                spanStart = EditText.EditableText.GetSpanStart(span[i]);
+                                spanEnd = EditText.EditableText.GetSpanEnd(span[i]);
+                                EditText.EditableText.RemoveSpan(span[i]);
+
+
+                            }
+
+                            return;
+                        }
+                        for (int i = 0; i < span.Length; i++)
+                        {
+                            spanStart = EditText.EditableText.GetSpanStart(span[i]);
+                            spanEnd = EditText.EditableText.GetSpanEnd(span[i]);
+                            if (spanStart == slend)
+                            {
+                                Editing = false;
+                                EditText.EditableText.Insert(slend, "\n");
+                            }
+                            if (spanEnd == slend)
+                            {
+                                Editing = false;
+                                IsEnd = true;
+                             //  EditText.EditableText.Insert(slend, " ");
+                              
+                            }
+                        }
+                    }
+                    else
+                        return;
+                }
+                finally { Editing = true; }
             }
         }
-
+      
     }
-   
+
 }
+   
+

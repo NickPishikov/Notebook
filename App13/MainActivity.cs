@@ -14,6 +14,7 @@ using Android.Content;
 using Android.Database;
 using Android.Database.Sqlite;
 
+
 namespace App13
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
@@ -28,6 +29,7 @@ namespace App13
         ICursor cursor;
         ListView list;
         CheckBox checknotes;
+        
         private const int REQUEST_RETURN_NOTE = 1; //Возвращаемое значение текста
         protected override void OnCreate(Bundle savedInstanceState)
         {
