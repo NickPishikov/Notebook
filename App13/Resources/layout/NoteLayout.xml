@@ -15,29 +15,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/toptable"
       
-        >
-    <ImageButton
-        android:src="@drawable/setimg"
-        android:id="@+id/settingsbut"
-           android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginRight="3dp"
-             android:scaleType="fitXY"
-         android:background="@null"
-           android:tint="@drawable/default_button_selector"
-        android:layout_alignParentLeft="true"
-
-    
-   />
+   >
         
-    <ImageButton
-        
+    <ImageButton        
       android:src="@drawable/accept"
           android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginRight="3dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="8dp"
             android:id="@+id/savebut"
       android:scaleType="fitXY"
          android:background="@null"
@@ -46,8 +31,7 @@
            
      />
       
-    </RelativeLayout
-                    >
+    </RelativeLayout>
        
  <ScrollView
        android:layout_width="match_parent"
@@ -57,38 +41,78 @@
     <EditText       
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
         android:id="@+id/editText1"
        android:inputType="textMultiLine"
         android:fontFamily="sans-serif"
        android:background="@null"
        android:textSize="25dp"
-      
-        
-        
-       
- 	/>
+      />
        
     </ScrollView>
-<RelativeLayout
-    android:fitsSystemWindows="true"
-    android:id="@+id/botpanel"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
+
+             
+        <LinearLayout
+                        
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:layout_alignParentBottom="true"
+        android:layout_marginTop="2dp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/botpanel"      
+     
         >
-   <Button
+    <ImageButton
+        android:src="@drawable/setimg"
+        android:id="@+id/setimg"
+        
+            style="@style/mystyle"
+            android:layout_marginBottom="2dp"
+     android:layout_marginHorizontal="25dp"
+             android:scaleType="fitXY"
+         android:background="@null"
+           android:tint="@drawable/default_button_selector"
+        android:layout_alignParentLeft="true"
+      
+    
+   />
+   <ImageButton
+            android:src="@drawable/settings"
         android:text="Settings"
-        android:id="@+id/but1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+            
+            style="@style/mystyle"
+            android:layout_marginBottom="2dp"
+       android:layout_marginHorizontal="25dp"
+             android:scaleType="fitXY"
+       android:background="@null"
+           android:tint="@drawable/default_button_selector"
         android:layout_alignParentLeft="true"
    />
-    <Button
-        android:text="Save" 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+       android:src="@drawable/clock"
+      android:id="@+id/notification"
         android:layout_alignParentRight="true"
+            style="@style/mystyle"
+            android:layout_marginBottom="2dp"
+          android:layout_marginHorizontal="25dp"
+             android:scaleType="fitXY"
+       android:background="@null"
+             android:tint="@drawable/default_button_selector"
+        android:layout_alignParentLeft="true"
    />
-  </RelativeLayout>
+           <ImageButton
+       android:src="@drawable/share"
+        
+        android:layout_alignParentRight="true"
+           style="@style/mystyle"
+            android:layout_marginBottom="2dp"
+            android:layout_marginHorizontal="25dp"
+             android:scaleType="fitXY"
+       android:background="@null"
+             android:tint="@drawable/default_button_selector"
+        android:layout_alignParentLeft="true"
+   />
+        </LinearLayout>
+
 
 </RelativeLayout>

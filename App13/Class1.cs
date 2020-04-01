@@ -6,7 +6,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.Database;
-
+using Android.Database.Sqlite;
 
 using System;
 namespace App13
@@ -116,6 +116,8 @@ namespace App13
         CheckBox checkbox;
         TextView textbox;
         int Position;
+        Databasehelper SqlHelper;
+        SQLiteDatabase Db;
         ICursor cursor1;
         Context context;
         public Listadapter(Context context, int layout, ICursor c, string[] from, int[] to, [GeneratedEnum] CursorAdapterFlags flags) : base(context, layout, c, from, to, flags)
@@ -124,55 +126,56 @@ namespace App13
             IsChecked = new bool[Cursor.Count];
             cursor1 = c;
         }
-        //public override void BindView(View view, Context context, ICursor cursor)
-        //{
-
-        //    base.BindView(view, context, cursor);
-
-        //    textbox = (TextView)view.FindViewById(Resource.Id.namenote);
-        //    checkbox = (CheckBox)view.FindViewById(Resource.Id.checknote);
-
-        //    int position = (int)view.GetTag(view.Id);
-
-        //    if (IsShow)
-        //    {
-        //        checkbox.Visibility = ViewStates.Visible;
-        //    }
-        //    else
-        //    {
-        //        checkbox.Visibility = ViewStates.Invisible;
-        //    }
-
-        //    if (IsShow) checkbox.Checked=IsChecked[position];
-        //    if(!checkbox.HasOnClickListeners)
-        //    checkbox.Click += (sender, e) =>
-        //    {
-        //        IsChecked[position] = !IsChecked[position];
-
-        //    };
-
-        //}
+        
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             base.GetView(position, convertView, parent);
+            bool IsFirstImg = false;
             ViewHolder viewHolder;
-
-
+            string[] nameNote = Cursor.GetString(Cursor.GetColumnIndex("ColumnText")).Split("\n");
+            SqlHelper = new Databasehelper(context);
+            Db = SqlHelper.ReadableDatabase;
             if (convertView == null)
             {
                 convertView = View.Inflate(context, Resource.Layout.activity_rows, null);
                 Cursor.MoveToPosition(position);
                 
                 viewHolder = new ViewHolder(convertView);
-                viewHolder.namenotes.Text= Cursor.GetString(Cursor.GetColumnIndex("ColumnText"));
+              
+
+                // viewHolder.namenotes.Text= Cursor.GetString(Cursor.GetColumnIndex("ColumnText"));
+
                 convertView.Tag = viewHolder;
             }
             else
             {
                 viewHolder = (ViewHolder)convertView.Tag;
+
             }
-               // viewHolder.namenotes=
-                
+            try
+            {
+                cursor1 = Db.RawQuery(("select " + Databasehelper.COLUMN_IMGPATH + " from " + Databasehelper.CONTENTTABLE + " where _id == " + (position + 1).ToString()), null);
+                while (cursor1.MoveToNext())
+                {
+                    string paths = cursor1.GetString(0);
+                    if (nameNote[0] == '[' + paths + ']')
+                    {
+                        viewHolder.namenotes.Text = "Изображение";
+                        IsFirstImg = true;
+                        break;
+                    }
+
+                }
+            }
+            catch
+            {
+                viewHolder.namenotes.Text = nameNote[0];
+            } 
+            if (!IsFirstImg)
+                viewHolder.namenotes.Text = nameNote[0];
+            
+          
+
 
 
 
@@ -208,29 +211,7 @@ namespace App13
 
             }
         }
-            //public override View NewView(Context context, ICursor cursor, ViewGroup parent)
-            //{
-            //    //base.GetView(position, convertView, parent);
-            //    View v;
-
-
-            //        LayoutInflater vi;
-            //        vi = LayoutInflater.From(parent.Context);
-            //        v = vi.Inflate(Resource.Layout.activity_rows,parent,false);
-
-
-
-            //    v.SetTag(v.Id, Cursor.posi);
-            //    // BindView(v, parent.Context, cursor1);
-            //   //NotifyDataSetChanged();
-
-
-
-
-
-            //    return v;
-
-            //}
+         
 
             public List<int> GetChecked()
             {

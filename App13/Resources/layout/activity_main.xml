@@ -45,7 +45,7 @@
               android:layout_width="30dp"
               android:layout_height="35dp"
                   android:layout_marginTop="8dp"
-            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:id="@+id/DeleteBut"
          android:src="@drawable/deleteimg"
     android:scaleType="fitXY"

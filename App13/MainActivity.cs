@@ -73,7 +73,9 @@ namespace App13
                   {
                       
                       db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id == " + checkedpos[i].ToString());
+                      db.ExecSQL("Delete from " + Databasehelper.CONTENTTABLE + " Where _id == " + checkedpos[i].ToString());
                       db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
+                      db.ExecSQL("UPDATE " + Databasehelper.CONTENTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
                       for (int j = i + 1; j < checkedpos.Count; j++)
                       {
                           checkedpos[j] = checkedpos[j] - 1;
@@ -129,16 +131,15 @@ namespace App13
             {
                 if (resultCode == Result.Ok)
                 {
-                    cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
-                    
-                    //cursor = db.RawQuery("select * from " + Databasehelper. TEXTTABLE, null);
+                    // cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
+                    cursor = db.RawQuery("select ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
+
+
                     cursorAdapter.ChangeCursor(cursor);
-                   //ursorAdapter.NotifyDataSetChanged();
-                    //START ACTIVITY
+
                 }
+
             }
-           
-          
         }
         protected  override void OnDestroy()
         {

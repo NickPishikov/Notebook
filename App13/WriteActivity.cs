@@ -13,10 +13,7 @@ using Android.Graphics;
 using Android.Database;
 using Android.Database.Sqlite;
 using Android.Graphics.Drawables;
-using Android.Views;
-using Android.Text.Method;
-using Android.Views;
-using Android.Util;
+using Android.Support.V4.App;
 
 
 namespace App13
@@ -31,15 +28,16 @@ namespace App13
         Databasehelper SqlHelper;
         SQLiteDatabase Db;
         ICursor cursor;
-        ImageButton SettingsBut;
+        ImageButton ImgBut;
         ImageButton SaveBut;
         private Bundle Args;
-        
+        ImageButton Notification;
 
         long NoteNumber = 0;
-        public Dictionary<string, Drawable> Images { get; set; } = new Dictionary<string, Drawable>();
+        public Dictionary<string, Bitmap> Images { get; set; } = new Dictionary<string, Bitmap>();
+        public TextWatcher textWatcher;
 
-    
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
@@ -47,7 +45,8 @@ namespace App13
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.NoteLayout);
-            SettingsBut = FindViewById<ImageButton>(Resource.Id.settingsbut);
+            Notification = FindViewById<ImageButton>(Resource.Id.notification);
+            ImgBut = FindViewById<ImageButton>(Resource.Id.setimg);
             SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             //setviews
@@ -56,15 +55,15 @@ namespace App13
 
             SqlHelper = new Databasehelper(this);
             Db = SqlHelper.WritableDatabase;
-
-            SettingsBut.Click += OnImageclick;
+            Notification.Click += sendNotify;
+            ImgBut.Click += OnImageclick;
             SaveBut.Click += OnSaveClick;
 
             EditText.SetPadding(40, 10, 40, 10);
 
 
-
-            EditText.AddTextChangedListener(new TextWatcher(EditText));
+            textWatcher = new TextWatcher(EditText);
+            EditText.AddTextChangedListener(textWatcher);
 
             Args = Intent.Extras;
             if (Args != null)
@@ -74,29 +73,59 @@ namespace App13
                     + Args.GetString(Databasehelper.COLUMN_ID), null);
                 cursor.MoveToFirst();
                 string text = cursor.GetString(cursor.GetColumnIndex("ColumnText"));
-               
+                EditText.Text = text;
                 cursor = Db.RawQuery("Select *" + " from " + Databasehelper.CONTENTTABLE
                     + " Where _id==" + Args.GetString(Databasehelper.COLUMN_ID), null);
-                if (cursor.MoveToFirst())
-                {
-
-                    do
-                    {
-                        Images.Add(cursor.GetString(1), new BitmapDrawable(this.Resources, SqlHelper.ReturnDrawableBase(cursor.GetLong(0), cursor.GetString(1))));
-
-                    }
-                    while (cursor.MoveToNext());
-                 /*   ImageGetter a = new ImageGetter(Images)*/;
-                    //var spannedFromHtml = Html.FromHtml(text, a, null);
-                    //EditText.SetText(spannedFromHtml, EditText.BufferType.Editable);
-                }
-                else EditText.Text = text;
+                setImages(cursor);
+            }
+           
                 
 
-            }
         }
         
+        void sendNotify(object sender, EventArgs e) //Create ntoification
+        {
+            NotificationCompat.Builder builder =
+          new NotificationCompat.Builder(this,"ID")
+                  .SetSmallIcon(Android.Resource.Drawable.IcButtonSpeakNow)
+                  .SetContentTitle("Напоминание")
+                  .SetContentText(EditText.Text);
 
+            Notification notification = builder.Build();
+
+            NotificationManager notificationManager =
+                   (NotificationManager)GetSystemService(NotificationService);
+            notificationManager.Notify(1, notification);
+        }
+        void setImages(ICursor cursor)
+        {
+            
+            if (cursor.MoveToFirst())
+            {
+                string path;
+                long id;
+                long start;
+                long end;
+                Bitmap bitmap = null;
+                do
+                {
+                    id = cursor.GetLong(0);
+                    path = cursor.GetString(1);
+                    start = cursor.GetLong(2);
+                    end = cursor.GetLong(3);
+                    bitmap = SqlHelper.ReturnDrawableBase(id, path);
+                    path = '[' + path + ']';
+                    var imageSpan = new ImageSpan(this, bitmap);
+                    ISpannable spann = SpannableFactory.Instance.NewSpannable(path);
+                    spann.SetSpan(imageSpan, 0, path.Length, SpanTypes.ExclusiveExclusive);
+                    textWatcher.Editing = false;
+                    EditText.EditableText.Replace((int)start, (int)end, spann);
+                }
+                while (cursor.MoveToNext());
+               
+            }
+           
+        } //SetImages in Text
         void OnSaveClick(object sender, EventArgs e) //SAVENOTES
         {
             string str = EditText.EditableText.ToString().Trim();
@@ -108,9 +137,9 @@ namespace App13
             }
             else
             {
+              
                 ContentValues cv = new ContentValues();
-                ContentValues cv2 = new ContentValues();
-                cv.Put(Databasehelper.COLUMN_TEXT, Html.ToHtml(EditText.EditableText));
+                cv.Put(Databasehelper.COLUMN_TEXT,EditText.Text);
                 
                 if (Args != null)
                 {
@@ -120,9 +149,9 @@ namespace App13
                 }
                 else
                 {
-                    long id;
-                    
-                    
+
+
+                    long id = 1;
                      cursor = Db.RawQuery("Select _id from " + Databasehelper.TEXTTABLE + " ORDER BY _id DESC LIMIT 1",null);
                     if (cursor.MoveToFirst())
                     {
@@ -130,27 +159,28 @@ namespace App13
                         cursor.Close();
                         id++;
                     }
-                    else
-                    {
-                        id = 1;
-                    }
-                    NoteNumber = id;
-
-                   
                     cv.Put(Databasehelper.COLUMN_ID, id);
                    Db.Insert(Databasehelper.TEXTTABLE, null, cv);
-                   
+                    NoteNumber = id;
                  
                 }
-                Java.Lang.Object[] span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan))); //Insert Image in Database
+                Java.Lang.Object[] span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
+              //Insert Image in Database
                 if (span != null)
                 {
                     for (int i = 0; i < span.Length; i++)
                     {
-                        SqlHelper.SaveBitmapBase(NoteNumber, ((ImageSpan)span[i]).Source, ((ImageSpan)span[i]).Drawable);
+                        int start = EditText.EditableText.GetSpanStart(span[i]);
+                        int end = EditText.EditableText.GetSpanEnd(span[i]);
+                        string source;
+                       
+                             source = EditText.Text.Substring(start + 1, end -start- 2);
+                        
+                       
+                        SqlHelper.SaveBitmapBase(NoteNumber, source, start, end, ((BitmapDrawable)((ImageSpan)span[i]).Drawable).Bitmap);
                     }
                 }
-                //     Db.Update(Databasehelper.TEXTTABLE)
+               
                 SetResult(Result.Ok);
             }
             Finish();
@@ -177,44 +207,51 @@ namespace App13
                         string Tag ='['+ selectedImage.LastPathSegment+']';
                         bitmap = Multitools.decodeSampledBitmapFromUri(this, selectedImage, 2000, 2000);
                         bitmap = Multitools.getResizedBitmap(bitmap, 1000, 1000);
+                       
                         var imageSpan = new ImageSpan(this, bitmap); //Find your drawable.
                        
                         int selStart = EditText.SelectionEnd;
                         var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
-                        for (int i = 0; i < span.Length; i++)
-                        {
-                            int end = EditText.EditableText.GetSpanEnd(span[i]);
-                            if (selStart == end)
-                            {
-                                EditText.EditableText.Insert(selStart, "\n");
-                                selStart=EditText.SelectionEnd;
-                            }
+                        //for (int i = 0; i < span.Length; i++)  
+                        //{
+                        //    int end = EditText.EditableText.GetSpanEnd(span[i]);
+                        //    if (selStart == end)
+                        //    {
+                        //        EditText.EditableText.Insert(selStart, "\n");
+                        //        selStart=EditText.SelectionEnd;
+                        //    }
 
 
-                        }
+                        //}//if image add in end other image
 
-                            ISpannable spann = SpannableFactory.Instance.NewSpannable(Tag);
+                        ISpannable spann = SpannableFactory.Instance.NewSpannable(Tag);
                         spann.SetSpan(imageSpan, 0, Tag.Length, SpanTypes.ExclusiveExclusive);
-                        EditText.EditableText.Insert(selStart ,spann);
-                       EditText.EditableText.Insert(selStart + Tag.Length, "\n");
-                       
+                        if (selStart!=0)
+                        EditText.EditableText.Insert(selStart, "\n");
+                        selStart = EditText.SelectionEnd;
+                        
+                        EditText.EditableText.Insert(selStart,spann);
+                        textWatcher.Editing = false;
+                        EditText.EditableText.Insert(selStart + Tag.Length, "\n");
+                        textWatcher.Editing = true;
+
 
                     }
                     break;
             }
 
         }
+
+
        
-
-
-        class TextWatcher : Java.Lang.Object, ITextWatcher
+     public   class TextWatcher : Java.Lang.Object, ITextWatcher
         {
             int slend;
             int spanStart;
             int spanEnd;
-            
+            public bool Editing = true;
             EditText EditText;
-            private bool Editing = true;
+          
             private bool IsEnd = false;
          public   TextWatcher(EditText text)
             {
@@ -231,14 +268,14 @@ namespace App13
                     try
                     {
                         EditText.EditableText.Insert(slend, "\n");
-                        // EditText.SetSelection(slend + 1);
+                       
                     }
                     catch
                     {
                         EditText.EditableText.Insert(slend-1  , "\n");
                     }
                 }
-            }
+            } 
 
             public void OnTextChanged(ICharSequence s, int start, int before, int count)
             {
@@ -258,14 +295,11 @@ namespace App13
                     EditText.EditableText.Replace(startSpan, endSpan, "");
                 }
 
-            }
-            public void BeforeTextChanged(ICharSequence s, int start, int count, int after)
-            {
+            }  //replace deleted spans
+            public void BeforeTextChanged(ICharSequence s, int start, int count, int after)  //delete spans and insert spaces
+             {
                 try
                 {
-                    //  TextChangedEventArgs eventArgs = (TextChangedEventArgs)a;
-
-                    if (start == 0) return;
                     var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
                     spanStart = -1;
                     spanEnd = -1;
@@ -275,6 +309,7 @@ namespace App13
                     
                     if (span != null && Editing)
                     {
+                       
                         if (count >after)
                         {
 
@@ -304,7 +339,7 @@ namespace App13
                             {
                                 Editing = false;
                                 IsEnd = true;
-                             //  EditText.EditableText.Insert(slend, " ");
+                           
                               
                             }
                         }
@@ -314,7 +349,7 @@ namespace App13
                 }
                 finally { Editing = true; }
             }
-        }
+        } //TextWatcher EditText
       
     }
 
