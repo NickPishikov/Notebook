@@ -7,12 +7,22 @@ using Android.Views;
 using Android.Widget;
 using Android.Database;
 using Android.Database.Sqlite;
-
+using Android.App;
+using Android.OS;
 using System;
+
 namespace App13
 {
     static class Multitools
     {
+        public static void createChannelIfNeeded(NotificationManager manager)
+        {
+            if (Convert.ToInt32(Build.VERSION.Sdk) >= 26)
+            {
+                NotificationChannel notificationChannel = new NotificationChannel("ID", "ID", NotificationImportance.High);
+                manager.CreateNotificationChannel(notificationChannel);
+            }
+        }
         private static int calculateInSampleSize(
              BitmapFactory.Options options, int reqWidth, int reqHeight)
         {
@@ -89,10 +99,10 @@ namespace App13
         {
             MemoryStream stream = new MemoryStream();
 
-            image.Compress(Bitmap.CompressFormat.Png, 100, stream);
+            image.Compress(Bitmap.CompressFormat.Jpeg, 50, stream);
             
-            byte[] byteArray = stream.ToArray();
-            return byteArray;
+           
+            return stream.ToArray();
         }
         public static Bitmap ConvertToBitmap(byte[] bytearray)
         {
@@ -100,7 +110,25 @@ namespace App13
             Bitmap BitmapResult = BitmapFactory.DecodeByteArray(bytearray, 0, bytearray.Length);
             return BitmapResult;
         }
-    }
+        public static string GetNameNote(string text,ICursor cursor1) //position +1
+        {
+            string paths;
+            while (cursor1.MoveToNext())
+            {
+                 paths = cursor1.GetString(0);
+                if (text == '[' + paths + ']')
+                {
+                    return "Изображение";
+                }
+
+            }
+            return text;
+        }
+            
+           
+           
+        }
+    
 
 
 
@@ -130,7 +158,7 @@ namespace App13
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             base.GetView(position, convertView, parent);
-            bool IsFirstImg = false;
+            string title;
             ViewHolder viewHolder;
             string[] nameNote = Cursor.GetString(Cursor.GetColumnIndex("ColumnText")).Split("\n");
             SqlHelper = new Databasehelper(context);
@@ -141,9 +169,7 @@ namespace App13
                 Cursor.MoveToPosition(position);
                 
                 viewHolder = new ViewHolder(convertView);
-              
-
-                // viewHolder.namenotes.Text= Cursor.GetString(Cursor.GetColumnIndex("ColumnText"));
+             
 
                 convertView.Tag = viewHolder;
             }
@@ -155,28 +181,10 @@ namespace App13
             try
             {
                 cursor1 = Db.RawQuery(("select " + Databasehelper.COLUMN_IMGPATH + " from " + Databasehelper.CONTENTTABLE + " where _id == " + (position + 1).ToString()), null);
-                while (cursor1.MoveToNext())
-                {
-                    string paths = cursor1.GetString(0);
-                    if (nameNote[0] == '[' + paths + ']')
-                    {
-                        viewHolder.namenotes.Text = "Изображение";
-                        IsFirstImg = true;
-                        break;
-                    }
-
-                }
+                title = Multitools.GetNameNote(nameNote[0], cursor1);
             }
-            catch
-            {
-                viewHolder.namenotes.Text = nameNote[0];
-            } 
-            if (!IsFirstImg)
-                viewHolder.namenotes.Text = nameNote[0];
-            
-          
-
-
+            catch { title = nameNote[0]; }
+            viewHolder.namenotes.Text = title; //Set Title In List
 
 
 

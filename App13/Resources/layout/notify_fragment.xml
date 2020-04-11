@@ -1,0 +1,60 @@
+﻿ 
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+   >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    android:text="Установите дату и время"
+    android:gravity="center" 
+        android:textSize="18dp"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:layout_margin="20dp"
+    
+   />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+         >
+            <Button
+            android:id="@+id/date_but"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+       />
+        <Button
+             android:id="@+id/time_but"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+         android:layout_marginLeft="10dp"/>
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    android:orientation="horizontal"
+ android:layout_marginTop="30dp"
+       android:gravity="center_horizontal"
+        
+        
+        >
+    <Button
+        android:id="@+id/accept_but"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+            android:text="Установить"
+       />
+        <Button
+            android:id="@+id/cancel_but"
+            android:text="Отменить"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+       />
+        </LinearLayout>
+    </LinearLayout>

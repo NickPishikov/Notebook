@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+//Исправить баг при удалении
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Android.App;
@@ -13,16 +15,18 @@ using Android.Graphics;
 using Android.Database;
 using Android.Database.Sqlite;
 using Android.Graphics.Drawables;
+using Android.Support.V7.App;
 using Android.Support.V4.App;
-
+using AndroidX;
+using Android.Preferences;
 
 namespace App13
 {
     [Activity(Label = "WriteActivity")]
-    public class WriteActivity : Activity
+    public class WriteActivity : AppCompatActivity
     {
-   
-       
+
+        NotifyFragment notifyFragment;
         private EditText EditText;
         const int GALLERY_REQUEST = 1;
         Databasehelper SqlHelper;
@@ -32,7 +36,8 @@ namespace App13
         ImageButton SaveBut;
         private Bundle Args;
         ImageButton Notification;
-
+        ISharedPreferences Shared;
+        ISharedPreferencesEditor PrefsEditor;
         long NoteNumber = 0;
         public Dictionary<string, Bitmap> Images { get; set; } = new Dictionary<string, Bitmap>();
         public TextWatcher textWatcher;
@@ -55,16 +60,19 @@ namespace App13
 
             SqlHelper = new Databasehelper(this);
             Db = SqlHelper.WritableDatabase;
-            Notification.Click += sendNotify;
+            Notification.Click += SendNotify;
             ImgBut.Click += OnImageclick;
             SaveBut.Click += OnSaveClick;
-
+            Shared = PreferenceManager.GetDefaultSharedPreferences(this);
+            PrefsEditor = Shared.Edit();
             EditText.SetPadding(40, 10, 40, 10);
 
 
             textWatcher = new TextWatcher(EditText);
+           
             EditText.AddTextChangedListener(textWatcher);
-
+            notifyFragment = new NotifyFragment(EditText.EditableText, Args);
+          
             Args = Intent.Extras;
             if (Args != null)
             {
@@ -77,25 +85,63 @@ namespace App13
                 cursor = Db.RawQuery("Select *" + " from " + Databasehelper.CONTENTTABLE
                     + " Where _id==" + Args.GetString(Databasehelper.COLUMN_ID), null);
                 setImages(cursor);
+                notifyFragment.Id=NoteNumber;
             }
+           
            
                 
 
         }
-        
-        void sendNotify(object sender, EventArgs e) //Create ntoification
+        int ta = 1;
+        public void SendNotify(object sender, EventArgs e) //Create ntoification
         {
-            NotificationCompat.Builder builder =
-          new NotificationCompat.Builder(this,"ID")
-                  .SetSmallIcon(Android.Resource.Drawable.IcButtonSpeakNow)
-                  .SetContentTitle("Напоминание")
-                  .SetContentText(EditText.Text);
 
-            Notification notification = builder.Build();
+            Dictionary<string, bool> a;
+            ta++;
+            //PrefsEditor.PutInt("1", ta);
+            //PrefsEditor.Apply();
+            cursor = Db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_NOTIFY }, "_id = ?", new string[] { notifyFragment.Id.ToString() } ,null,null,null);
+            cursor.MoveToFirst();
+                if (cursor.Count!=0&&cursor.GetInt(cursor.GetColumnIndex(Databasehelper.COLUMN_NOTIFY))==1)
+            {
+               Dialog dialog = CreateAlertAlarm();
+                dialog.Show();
+               Toast s = Toast.MakeText(this, "Напоминане удалено", ToastLength.Long);
+                s.Show();
+            }
+            else
+            {
+                Android.Support.V4.App.FragmentManager fragmentManager = SupportFragmentManager;
+             
+                if (notifyFragment.Args != null)
+                {
+                    Args = notifyFragment.Args;
+                    NoteNumber = notifyFragment.Id;
+                }
 
-            NotificationManager notificationManager =
-                   (NotificationManager)GetSystemService(NotificationService);
-            notificationManager.Notify(1, notification);
+                notifyFragment.SetContent(EditText.EditableText, Args);
+                notifyFragment.Show(fragmentManager, "MydDialog");
+            }
+           
+            
+         
+
+         
+          
+          
+           
+        }
+
+        public Android.Support.V7.App.AlertDialog CreateAlertAlarm()
+        {
+            Android.Support.V7.App.AlertDialog.Builder builder = new Android.Support.V7.App.AlertDialog.Builder(this);
+            builder.SetTitle("Напоминание уже установлено.");
+            builder.SetMessage("Хотите удалить старое напоминание?");
+            builder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+            builder.SetNegativeButton("Выйти", (sender, args) => { });
+            builder.SetPositiveButton("Удалить", (sender, args) => { notifyFragment.CancelAlarm(this); });
+            return builder.Create();
+
         }
         void setImages(ICursor cursor)
         {
@@ -126,65 +172,40 @@ namespace App13
             }
            
         } //SetImages in Text
+       
         void OnSaveClick(object sender, EventArgs e) //SAVENOTES
         {
             string str = EditText.EditableText.ToString().Trim();
-            
 
+            if (notifyFragment.Args!=null)
+            Args = notifyFragment.Args;
             if (str.Length == 0)
             {
                 SetResult(Result.Canceled);
             }
             else
             {
-              
-                ContentValues cv = new ContentValues();
-                cv.Put(Databasehelper.COLUMN_TEXT,EditText.Text);
-                
-                if (Args != null)
+              NoteNumber=SqlHelper.SaveText(EditText.EditableText, Args);
+
+            
+                if (notifyFragment != null)
                 {
-                    Db.Update(Databasehelper.TEXTTABLE, cv, "_id == ?", new string[] { Args.GetString(Databasehelper.COLUMN_ID) });
-                    Db.ExecSQL("DELETE from " + Databasehelper.CONTENTTABLE + " Where _id == " + Args.GetString(Databasehelper.COLUMN_ID)); //Delete old image
-                  
+                    Thread thread = new Thread(ChangeNotifyContent);
+                    thread.Start();
                 }
-                else
-                {
 
 
-                    long id = 1;
-                     cursor = Db.RawQuery("Select _id from " + Databasehelper.TEXTTABLE + " ORDER BY _id DESC LIMIT 1",null);
-                    if (cursor.MoveToFirst())
-                    {
-                        id = cursor.GetLong(cursor.GetColumnIndex("_id"));
-                        cursor.Close();
-                        id++;
-                    }
-                    cv.Put(Databasehelper.COLUMN_ID, id);
-                   Db.Insert(Databasehelper.TEXTTABLE, null, cv);
-                    NoteNumber = id;
-                 
-                }
-                Java.Lang.Object[] span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
-              //Insert Image in Database
-                if (span != null)
-                {
-                    for (int i = 0; i < span.Length; i++)
-                    {
-                        int start = EditText.EditableText.GetSpanStart(span[i]);
-                        int end = EditText.EditableText.GetSpanEnd(span[i]);
-                        string source;
-                       
-                             source = EditText.Text.Substring(start + 1, end -start- 2);
-                        
-                       
-                        SqlHelper.SaveBitmapBase(NoteNumber, source, start, end, ((BitmapDrawable)((ImageSpan)span[i]).Drawable).Bitmap);
-                    }
-                }
-               
                 SetResult(Result.Ok);
             }
             Finish();
             
+        }
+        void ChangeNotifyContent()
+        {
+            cursor = Db.RawQuery(("select " + Databasehelper.COLUMN_IMGPATH + " from " + Databasehelper.CONTENTTABLE + " where _id == " + NoteNumber.ToString()), null);
+            notifyFragment.Content = Multitools.GetNameNote(EditText.Text.Split("\n")[0], cursor);
+            notifyFragment.ChangeIntent(this);
+
         }
         void OnImageclick(object sender, EventArgs e) //open explorer 
         {
@@ -207,22 +228,12 @@ namespace App13
                         string Tag ='['+ selectedImage.LastPathSegment+']';
                         bitmap = Multitools.decodeSampledBitmapFromUri(this, selectedImage, 2000, 2000);
                         bitmap = Multitools.getResizedBitmap(bitmap, 1000, 1000);
-                       
+                     
                         var imageSpan = new ImageSpan(this, bitmap); //Find your drawable.
-                       
+                      
                         int selStart = EditText.SelectionEnd;
                         var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
-                        //for (int i = 0; i < span.Length; i++)  
-                        //{
-                        //    int end = EditText.EditableText.GetSpanEnd(span[i]);
-                        //    if (selStart == end)
-                        //    {
-                        //        EditText.EditableText.Insert(selStart, "\n");
-                        //        selStart=EditText.SelectionEnd;
-                        //    }
-
-
-                        //}//if image add in end other image
+                      
 
                         ISpannable spann = SpannableFactory.Instance.NewSpannable(Tag);
                         spann.SetSpan(imageSpan, 0, Tag.Length, SpanTypes.ExclusiveExclusive);

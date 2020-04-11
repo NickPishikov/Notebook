@@ -1,6 +1,5 @@
-﻿//graphical parts
-//savesbitmaps
-
+﻿//changeID!!!
+//add try catch on reveiver.
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ using Android.Widget;
 using Android.Content;
 using Android.Database;
 using Android.Database.Sqlite;
-
+using Android.Preferences;
 
 namespace App13
 {
@@ -29,6 +28,8 @@ namespace App13
         ICursor cursor;
         ListView list;
         CheckBox checknotes;
+        ISharedPreferences Shared;
+        ISharedPreferencesEditor editor;
         
         private const int REQUEST_RETURN_NOTE = 1; //Возвращаемое значение текста
         protected override void OnCreate(Bundle savedInstanceState)
@@ -41,14 +42,17 @@ namespace App13
             CancelBut =(ImageButton)FindViewById(Resource.Id.CancelBut);
             DeleteBut = (ImageButton)FindViewById(Resource.Id.DeleteBut);
             list = (ListView)FindViewById(Resource.Id.values);
+            list.RequestFocus();
             
             //views
             sqlHelper = new Databasehelper(this);
             db = sqlHelper.ReadableDatabase;
-            
+            //   db.ExecSQL("DROP Table " + Databasehelper.CONTENTTABLE);
+            //  db.ExecSQL("DROP Table " + Databasehelper.TEXTTABLE);
             //sql
             //getcursor
-
+            Shared = PreferenceManager.GetDefaultSharedPreferences(this);
+            editor = Shared.Edit();
             cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, rowid from " + Databasehelper.TEXTTABLE, null);
 
 
@@ -71,11 +75,16 @@ namespace App13
                   List<int> checkedpos = cursorAdapter.GetChecked();
                   for (int i = 0; i < checkedpos.Count; i++)
                   {
-                      
+                     
                       db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id == " + checkedpos[i].ToString());
                       db.ExecSQL("Delete from " + Databasehelper.CONTENTTABLE + " Where _id == " + checkedpos[i].ToString());
+                     
                       db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
                       db.ExecSQL("UPDATE " + Databasehelper.CONTENTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
+                      cursor = db.Query(Databasehelper.TEXTTABLE, new string[] { "_id",Databasehelper.COLUMN_TEXT }, Databasehelper.COLUMN_NOTIFY + "= ?", new string[] { "1" }, null, null, null);
+                      NotifyFragment a = new NotifyFragment(null, null);
+                      a.ChangeId(this, checkedpos[i], checkedpos[i], "TESTING");
+
                       for (int j = i + 1; j < checkedpos.Count; j++)
                       {
                           checkedpos[j] = checkedpos[j] - 1;
@@ -127,6 +136,7 @@ namespace App13
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
+        
             if (requestCode == REQUEST_RETURN_NOTE)
             {
                 if (resultCode == Result.Ok)
@@ -140,6 +150,9 @@ namespace App13
                 }
 
             }
+            cursor = db.RawQuery("select ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
+            cursorAdapter.ChangeCursor(cursor);
+            cursorAdapter.NotifyDataSetChanged();
         }
         protected  override void OnDestroy()
         {
