@@ -197,7 +197,7 @@ namespace App13
                 viewHolder.checkBox.Visibility = ViewStates.Invisible;
             }
 
-            if (IsShow) viewHolder.checkBox.Checked = IsChecked[position];
+             if (IsShow) viewHolder.checkBox.Checked = IsChecked[position];
             if (!viewHolder.checkBox.HasOnClickListeners)
                 viewHolder.checkBox.Click += (sender, e) =>
                 {

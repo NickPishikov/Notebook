@@ -27,31 +27,22 @@ namespace App13
         ISharedPreferences Shared;
         ISharedPreferencesEditor PrefsEditor;
         Databasehelper databasehelper;
+        ICursor cursor;
         SQLiteDatabase Db;
         public override void OnReceive(Context context, Intent intent)
         {
             databasehelper = new Databasehelper(context);
             Db = databasehelper.WritableDatabase;
-            
-            //Shared = PreferenceManager.GetDefaultSharedPreferences(context);
-            //PrefsEditor = Shared.Edit();
-            ContentValues cv = new ContentValues();
-            cv.Put(Databasehelper.COLUMN_NOTIFY, 0);
-
-            Db.Update(Databasehelper.TEXTTABLE, cv, "_id =?", new string[] { intent.GetLongExtra("_id", 0).ToString() });
-            //if (Shared.Contains(intent.GetLongExtra("_id", 0).ToString()))
-            //{
-            //    PrefsEditor.Remove(intent.GetLongExtra("_id", -1).ToString());
-            //    PrefsEditor.Apply();
-            //}
-         
-           
+            cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.NEW_ID }, Databasehelper.START_ID + " = ?",new string[] { intent.GetLongExtra("_id", 0).ToString() }, null, null, null);
+            cursor.MoveToFirst();
+            long a = cursor.GetLong(0);
             Intent intent1 = new Intent(context, typeof(WriteActivity));
-            intent1.PutExtra("_id",intent.GetLongExtra("_id",0).ToString() );
-            Android.App.PendingIntent resultPendingIntent = Android.App.PendingIntent.GetActivity(context, 0, intent1,
+            intent1.PutExtra("_id",cursor.GetLong(cursor.GetColumnIndex(Databasehelper.NEW_ID)).ToString());
+            Db.Delete(Databasehelper.NOTIFYTABLE, Databasehelper.START_ID + " = ?", new string[] { intent.GetLongExtra("_id", 0).ToString() });
+            Android.App.PendingIntent resultPendingIntent = Android.App.PendingIntent.GetActivity(context, Convert.ToInt32(a), intent1,
                Android.App.PendingIntentFlags.UpdateCurrent);
             NotificationCompat.Builder builder =
-            new NotificationCompat.Builder(context, "ID")
+            new NotificationCompat.Builder(context,"ID")
                     .SetSmallIcon(Android.Resource.Drawable.IcButtonSpeakNow)
                     .SetContentTitle(intent.GetStringExtra("Вам напоминание!"))
                     .SetContentText(intent.GetStringExtra("message"))
@@ -65,7 +56,7 @@ namespace App13
 
 
             Multitools.createChannelIfNeeded(manager);
-            manager.Notify(1, notification);
+            manager.Notify(Convert.ToInt32(a), notification);
         }
         public void SetAlarm(Context context,string content,Calendar calendar)
         {
@@ -186,22 +177,26 @@ namespace App13
                 NotifyManager notify = new NotifyManager();
                alarm = (Android.App.AlarmManager)Context.GetSystemService(Context.AlarmService);
                 intent = new Intent(Context, typeof(NotifyManager));
-              
-                intent.PutExtra("_id", Id);
+                long uniqueId = SqlHelper.getNotifyId();
+                intent.PutExtra("_id", uniqueId);
                 intent.PutExtra("message", Content);
-                ChangeIntent(Context);
-                pendingIntent = Android.App.PendingIntent.GetBroadcast(Context, Convert.ToInt32(Id), intent, Android.App.PendingIntentFlags.UpdateCurrent);
+                //ChangeIntent(Context);
+                pendingIntent = Android.App.PendingIntent.GetBroadcast(Context, Convert.ToInt32(uniqueId), intent, Android.App.PendingIntentFlags.UpdateCurrent);
+               
                 
                
                 if (Convert.ToInt32(Build.VERSION.Sdk) >= 19)
                     alarm.SetExact(Android.App.AlarmType.RtcWakeup, calendar.TimeInMillis, pendingIntent);
                 else
                     alarm.Set(Android.App.AlarmType.RtcWakeup, calendar.TimeInMillis, pendingIntent);
+                
                 ContentValues cv = new ContentValues();
-                cv.Put(Databasehelper.COLUMN_NOTIFY, 1);
-                cv.Put(Databasehelper.COLUMN_TIME, calendar.TimeInMillis);
+                //cv.Put(Databasehelper.COLUMN_NOTIFY, 1);
+                //cv.Put(Databasehelper.COLUMN_TIME, calendar.TimeInMillis);
+                cv.Put(Databasehelper.START_ID, uniqueId);
+                cv.Put(Databasehelper.NEW_ID, Id); //While id is identific
 
-                Db.Update(Databasehelper.TEXTTABLE,cv,"_id = ?",new string[] { Id.ToString()});
+                Db.Insert(Databasehelper.NOTIFYTABLE, null, cv);
                 //PrefsEditor.PutBoolean(Id.ToString(), true);
                 //PrefsEditor.Apply();
                
@@ -210,56 +205,53 @@ namespace App13
               
             }
         }
-     public void CancelAlarm(Context context)
+        public void CancelAlarm(Context context)
         {
             //Shared = PreferenceManager.GetDefaultSharedPreferences(context);
             SqlHelper = new Databasehelper(context);
             Db = SqlHelper.WritableDatabase;
+            cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.START_ID }, Databasehelper.NEW_ID + "=?", new string[] { Id.ToString() }, null, null, null);
+            cursor.MoveToFirst();
             //PrefsEditor = Shared.Edit();
             alarm = (Android.App.AlarmManager)context.GetSystemService(Context.AlarmService);
             intent = new Intent(context, typeof(NotifyManager));
-            pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(Id), intent, Android.App.PendingIntentFlags.UpdateCurrent);
+            pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(cursor.GetLong(0)), intent, Android.App.PendingIntentFlags.UpdateCurrent);
             alarm.Cancel(pendingIntent);
             ContentValues cv = new ContentValues();
-            cv.Put(Databasehelper.COLUMN_NOTIFY, 0);
+            //cv.Put(Databasehelper.COLUMN_NOTIFY, 0);
 
-            Db.Update(Databasehelper.TEXTTABLE, cv, "_id = ?", new string[] { Id.ToString() });
+            //Db.Update(Databasehelper.TEXTTABLE, cv, "_id = ?", new string[] { Id.ToString() });
             //PrefsEditor.Remove(Id.ToString());
             //PrefsEditor.Apply();
+        }
+        public void CancelAlarm(Context context,long oldId)
+        {
+            SqlHelper = new Databasehelper(context);
+            Db = SqlHelper.WritableDatabase;
+            cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.START_ID }, Databasehelper.NEW_ID + "=?", new string[] { oldId.ToString() }, null, null, null);
+            cursor.MoveToFirst();
+            if (cursor.Count != 0) {
+                alarm = (Android.App.AlarmManager)context.GetSystemService(Context.AlarmService);
+                intent = new Intent(context, typeof(NotifyManager));
+                pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(cursor.GetLong(0)), intent, Android.App.PendingIntentFlags.UpdateCurrent);
+                alarm.Cancel(pendingIntent); 
+            } //cancel old alarm
         }
       public void ChangeIntent(Context context)
         {
             if (intent != null)
             {
                 intent.RemoveExtra("message");
-               
-               // (WriteActivity)context.ApplicationContext.
+                SqlHelper = new Databasehelper(context);
+                Db = SqlHelper.WritableDatabase;
+                cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.START_ID }, Databasehelper.NEW_ID + "=?", new string[] { Id.ToString() }, null, null, null);
+                cursor.MoveToFirst();
+                // (WriteActivity)context.ApplicationContext.
                 intent.PutExtra("message", Content);
-                pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(Id), intent, Android.App.PendingIntentFlags.UpdateCurrent);
+                pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(cursor.GetLong(0)), intent, Android.App.PendingIntentFlags.UpdateCurrent);
             }
         }
-        public void ChangeId(Context context, long newId, long oldId, string text)
-        {
-            SqlHelper = new Databasehelper(context);
-            Db = SqlHelper.WritableDatabase;
-            alarm = (Android.App.AlarmManager)context.GetSystemService(Context.AlarmService);
-            intent = new Intent(context, typeof(NotifyManager));
-            pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(oldId), intent, Android.App.PendingIntentFlags.UpdateCurrent);
-            alarm.Cancel(pendingIntent); //cancel old alarm
-
-
-            intent.PutExtra("message", text);
-            intent.PutExtra("_id", newId);
-            pendingIntent = Android.App.PendingIntent.GetBroadcast(context, Convert.ToInt32(oldId), intent, Android.App.PendingIntentFlags.UpdateCurrent);
-            cursor = Db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_TIME }, "_id = ?",new string[] { newId.ToString() }, null, null, null);
-            cursor.MoveToFirst();
-            if (Convert.ToInt32(Build.VERSION.Sdk) >= 19)
-                alarm.SetExact(Android.App.AlarmType.RtcWakeup, cursor.GetInt(0), pendingIntent);
-            else
-                alarm.Set(Android.App.AlarmType.RtcWakeup, cursor.GetInt(0), pendingIntent);
-          
-
-        }
+      
 
         void OnClickCancel(object sender,EventArgs e)
         {

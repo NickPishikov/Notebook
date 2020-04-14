@@ -75,15 +75,41 @@ namespace App13
                   List<int> checkedpos = cursorAdapter.GetChecked();
                   for (int i = 0; i < checkedpos.Count; i++)
                   {
-                     
+                      NotifyFragment a = new NotifyFragment(null, null);
+                      
                       db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id == " + checkedpos[i].ToString());
                       db.ExecSQL("Delete from " + Databasehelper.CONTENTTABLE + " Where _id == " + checkedpos[i].ToString());
+                      db.ExecSQL("Delete from " + Databasehelper.NOTIFYTABLE +" Where " + Databasehelper.NEW_ID + " == " + checkedpos[i].ToString());
                      
+                      //cursor = db.RawQuery("Select _id, " + Databasehelper.COLUMN_TEXT + " from " + Databasehelper.TEXTTABLE + " where _id >" + checkedpos[i].ToString(), null);
+                      //cursor = db.RawQuery("Select _id, " + Databasehelper.COLUMN_TEXT + " from " + Databasehelper.TEXTTABLE + " where _id >" + checkedpos[i] + " and " + Databasehelper.COLUMN_NOTIFY + " == 1", null);
+                      a.CancelAlarm(this, checkedpos[i]);
+                      db.ExecSQL("Update " + Databasehelper.NOTIFYTABLE + " Set "+Databasehelper.NEW_ID+"="+Databasehelper.NEW_ID+"-1 Where "+Databasehelper.NEW_ID+ ">" + checkedpos[i].ToString());
                       db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
                       db.ExecSQL("UPDATE " + Databasehelper.CONTENTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
-                      cursor = db.Query(Databasehelper.TEXTTABLE, new string[] { "_id",Databasehelper.COLUMN_TEXT }, Databasehelper.COLUMN_NOTIFY + "= ?", new string[] { "1" }, null, null, null);
-                      NotifyFragment a = new NotifyFragment(null, null);
-                      a.ChangeId(this, checkedpos[i], checkedpos[i], "TESTING");
+
+                    
+                     
+
+                      //if (cursor.MoveToFirst())
+                      //{
+                      //    do
+                      //    {
+                      //        a.CancelAlarm(this, cursor.GetLong(0));
+                             
+                      //    }
+                      //    while (cursor.MoveToNext());
+                      //}
+                      //if (cursor.MoveToFirst())
+                      //{
+                      //    do
+                      //    {
+                      //        a.ChangeId(this, cursor.GetLong(0) - 1, cursor.GetString(1).Split("\n")[0]);
+
+                      //    }
+                      //    while (cursor.MoveToNext());
+                      //}
+                    
 
                       for (int j = i + 1; j < checkedpos.Count; j++)
                       {

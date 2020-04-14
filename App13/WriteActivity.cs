@@ -96,18 +96,14 @@ namespace App13
         public void SendNotify(object sender, EventArgs e) //Create ntoification
         {
 
-            Dictionary<string, bool> a;
-            ta++;
-            //PrefsEditor.PutInt("1", ta);
-            //PrefsEditor.Apply();
-            cursor = Db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_NOTIFY }, "_id = ?", new string[] { notifyFragment.Id.ToString() } ,null,null,null);
-            cursor.MoveToFirst();
-                if (cursor.Count!=0&&cursor.GetInt(cursor.GetColumnIndex(Databasehelper.COLUMN_NOTIFY))==1)
+         
+           
+            cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.NEW_ID }, Databasehelper.NEW_ID+" = ?", new string[] { notifyFragment.Id.ToString() }, null, null, null);
+                if (cursor.Count!=0)
             {
                Dialog dialog = CreateAlertAlarm();
                 dialog.Show();
-               Toast s = Toast.MakeText(this, "Напоминане удалено", ToastLength.Long);
-                s.Show();
+
             }
             else
             {
@@ -139,7 +135,9 @@ namespace App13
             builder.SetMessage("Хотите удалить старое напоминание?");
             builder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
             builder.SetNegativeButton("Выйти", (sender, args) => { });
-            builder.SetPositiveButton("Удалить", (sender, args) => { notifyFragment.CancelAlarm(this); });
+            builder.SetPositiveButton("Удалить", (sender, args) => { notifyFragment.CancelAlarm(this); Db.Delete(Databasehelper.NOTIFYTABLE, Databasehelper.NEW_ID + " = ?", new string[] { notifyFragment.Id.ToString() }); Toast s = Toast.MakeText(this, "Напоминане удалено", ToastLength.Long); s.Show(); ;
+                s.Show();
+            });
             return builder.Create();
 
         }
@@ -351,7 +349,7 @@ namespace App13
                                 Editing = false;
                                 IsEnd = true;
                            
-                              
+                           
                             }
                         }
                     }
