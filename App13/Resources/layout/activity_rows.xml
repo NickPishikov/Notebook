@@ -5,27 +5,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" 
-    android:orientation="horizontal"
-     android:background="@drawable/gradient"
-   
+    android:orientation="vertical"
+    
+ 
     >
  
 
-   
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <TextView
         android:id="@+id/namenote"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:singleLine="true"
        android:layout_weight="1"
-      
+   android:fontFamily="Roboto"
      android:textStyle="bold"
        android:textColor="@android:color/black"
        android:maxLength="20"
-     android:textAlignment="center"
-        android:paddingVertical="20dp"
+          android:layout_marginTop="3dp"
         />
-    <CheckBox
+     <CheckBox
         android:id="@+id/checknote"
       
         
@@ -35,6 +37,32 @@
     android:focusable="false"
     android:focusableInTouchMode="false"
        
-    android:gravity ="right"/>
+    android:layout_gravity="left"/>  
+        </LinearLayout>
+      <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom">
+        <TextView
+        android:id="@+id/editing_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        
+    android:textSize="13dp"
+    
+       android:layout_gravity="bottom"
+    />
+     <ImageView
+        android:id="@+id/clock_notify"
+       android:layout_width="13dp"
+       android:layout_height="13dp"
+    android:src="@drawable/clock"
+        android:layout_gravity="bottom"
+         android:visibility="invisible"            
+    />
+ 
+    </LinearLayout>
+   
         
 </LinearLayout>

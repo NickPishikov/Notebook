@@ -14,24 +14,29 @@
         android:fontFamily="sans-serif"
         android:textStyle="bold"
         android:layout_margin="20dp"
+        android:textColor="@android:color/black"
     
    />
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
          >
             <Button
             android:id="@+id/date_but"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
+             android:background="@color/cardview_light_background"
+            
        />
         <Button
              android:id="@+id/time_but"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-         android:layout_marginLeft="10dp"/>
+         android:layout_marginLeft="10dp"
+
+        android:background="@color/cardview_light_background"/>
         </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,6 +53,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
             android:text="Установить"
+            android:textColor="@android:color/holo_blue_dark"
+            android:background="@color/cardview_light_background"
        />
         <Button
             android:id="@+id/cancel_but"
@@ -55,6 +62,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+             android:textColor="@android:color/holo_blue_dark"
+            android:background="@color/cardview_light_background"
        />
         </LinearLayout>
     </LinearLayout>

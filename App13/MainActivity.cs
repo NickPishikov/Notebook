@@ -1,5 +1,4 @@
-﻿//changeID!!!
-//add try catch on reveiver.
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -29,7 +28,7 @@ namespace App13
         ListView list;
         CheckBox checknotes;
         ISharedPreferences Shared;
-        ISharedPreferencesEditor editor;
+        ISharedPreferencesEditor Editor;
         
         private const int REQUEST_RETURN_NOTE = 1; //Возвращаемое значение текста
         protected override void OnCreate(Bundle savedInstanceState)
@@ -51,9 +50,10 @@ namespace App13
             //  db.ExecSQL("DROP Table " + Databasehelper.TEXTTABLE);
             //sql
             //getcursor
+           
+            cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + " from " + Databasehelper.TEXTTABLE, null);
             Shared = PreferenceManager.GetDefaultSharedPreferences(this);
-            editor = Shared.Edit();
-            cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, rowid from " + Databasehelper.TEXTTABLE, null);
+            Editor = Shared.Edit();
 
 
             string[] headers = new string[] {Databasehelper.COLUMN_TEXT}; //used columns in note
@@ -72,54 +72,20 @@ namespace App13
             };
             DeleteBut.Click += (sender, e) =>
               {
+                  cursor = db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_ID }, Databasehelper.COLUMN_NOTIFY + "= ?", new string[] { "1" }, null, null, null);
                   List<int> checkedpos = cursorAdapter.GetChecked();
                   for (int i = 0; i < checkedpos.Count; i++)
                   {
                       NotifyFragment a = new NotifyFragment(null, null);
-                      
-                      db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id == " + checkedpos[i].ToString());
-                      db.ExecSQL("Delete from " + Databasehelper.CONTENTTABLE + " Where _id == " + checkedpos[i].ToString());
-                      db.ExecSQL("Delete from " + Databasehelper.NOTIFYTABLE +" Where " + Databasehelper.NEW_ID + " == " + checkedpos[i].ToString());
-                     
-                      //cursor = db.RawQuery("Select _id, " + Databasehelper.COLUMN_TEXT + " from " + Databasehelper.TEXTTABLE + " where _id >" + checkedpos[i].ToString(), null);
-                      //cursor = db.RawQuery("Select _id, " + Databasehelper.COLUMN_TEXT + " from " + Databasehelper.TEXTTABLE + " where _id >" + checkedpos[i] + " and " + Databasehelper.COLUMN_NOTIFY + " == 1", null);
-                      a.CancelAlarm(this, checkedpos[i]);
-                      db.ExecSQL("Update " + Databasehelper.NOTIFYTABLE + " Set "+Databasehelper.NEW_ID+"="+Databasehelper.NEW_ID+"-1 Where "+Databasehelper.NEW_ID+ ">" + checkedpos[i].ToString());
-                      db.ExecSQL("Update " + Databasehelper.TEXTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
-                      db.ExecSQL("UPDATE " + Databasehelper.CONTENTTABLE + " Set _id=_id-1 Where _id >" + checkedpos[i].ToString());
-
-                    
-                     
-
-                      //if (cursor.MoveToFirst())
-                      //{
-                      //    do
-                      //    {
-                      //        a.CancelAlarm(this, cursor.GetLong(0));
-                             
-                      //    }
-                      //    while (cursor.MoveToNext());
-                      //}
-                      //if (cursor.MoveToFirst())
-                      //{
-                      //    do
-                      //    {
-                      //        a.ChangeId(this, cursor.GetLong(0) - 1, cursor.GetString(1).Split("\n")[0]);
-
-                      //    }
-                      //    while (cursor.MoveToNext());
-                      //}
-                    
-
-                      for (int j = i + 1; j < checkedpos.Count; j++)
-                      {
-                          checkedpos[j] = checkedpos[j] - 1;
-                      }
-                   //   cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
-                      
+                      cursor = db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_NOTIFY }, "_id = ?", new string[] { cursorAdapter.GetItemId(checkedpos[i]).ToString() }, null, null,null);
+                      cursor.MoveToFirst();
+                      db.ExecSQL("Delete from " + Databasehelper.TEXTTABLE + " Where _id == " +cursorAdapter.GetItemId(checkedpos[i]).ToString());
+                      db.ExecSQL("Delete from " + Databasehelper.CONTENTTABLE + " Where _id == " + cursorAdapter.GetItemId(checkedpos[i]).ToString());
+                      if(cursor.GetInt(0)==1)
+                      a.CancelAlarm(this, cursorAdapter.GetItemId(checkedpos[i]));       
                   }
-                  
-                  cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
+
+                  cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + " from " + Databasehelper.TEXTTABLE, null);
                   cursorAdapter.ChangeCursor(cursor);
                   cursorAdapter.IsShowCheckbox(false);
                   DeleteBut.Visibility = ViewStates.Invisible;
@@ -151,6 +117,12 @@ namespace App13
              };
             //listeners
         }
+        protected  override void OnResume()
+        {
+            base.OnResume();
+            cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY +","+Databasehelper.COLUMN_EDITINGTIME + " from " + Databasehelper.TEXTTABLE, null);
+            cursorAdapter.ChangeCursor(cursor);
+        }
 
         void addToListClick(object sender, EventArgs e)
         {
@@ -168,7 +140,8 @@ namespace App13
                 if (resultCode == Result.Ok)
                 {
                     // cursor = db.RawQuery("select trim(ltrim(ColumnText),'\n') as ColumnText, _id from " + Databasehelper.TEXTTABLE, null);
-                    cursor = db.RawQuery("select ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
+                    cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + " from " + Databasehelper.TEXTTABLE, null);
+
 
 
                     cursorAdapter.ChangeCursor(cursor);
@@ -176,7 +149,7 @@ namespace App13
                 }
 
             }
-            cursor = db.RawQuery("select ColumnText,_id from " + Databasehelper.TEXTTABLE, null);
+            cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + " from " + Databasehelper.TEXTTABLE, null);
             cursorAdapter.ChangeCursor(cursor);
             cursorAdapter.NotifyDataSetChanged();
         }

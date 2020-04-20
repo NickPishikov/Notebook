@@ -24,10 +24,9 @@ namespace App13
         public readonly static string COLUMN_END = "ColumnEnd";
         public readonly static string COLUMN_NOTIFY = "ColumnNotify";
         public readonly static string COLUMN_TIME = "ColumnTime";
-        public readonly static string START_ID = "StartNotifyId";
-        public readonly static string NEW_ID = "NewNotifyId";
+    
         public readonly static string NOTIFYTABLE = "NotifyTable";
-
+        public readonly static string COLUMN_EDITINGTIME = "EditingTime";
         ICursor cursor;
         public Databasehelper(Context context) : base(context, DATABASE_NAME, null, version)
         {
@@ -36,27 +35,16 @@ namespace App13
         {
             db.ExecSQL("CREATE TABLE IF NOT EXISTS TextTable (" + COLUMN_ID
                     + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_TEXT //for listview
-                    + " TEXT," + COLUMN_NOTIFY +" BOOLEAN, "+ COLUMN_TIME + " INTEGER)");
+                    + " TEXT," + COLUMN_NOTIFY +" BOOLEAN, "+ COLUMN_TIME + " INTEGER DEFAULT 0, " +COLUMN_EDITINGTIME+" TEXT)");
 
             db.ExecSQL("CREATE TABLE IF NOT EXISTS ContentTable (" + COLUMN_ID + " INTEGER, "+ COLUMN_IMGPATH + " TEXT, " +
                 COLUMN_START +" INTEGER, " +
                 COLUMN_END+ " INTEGER, "
                 + COLUMN_BITMAP + " BLOB)");
-            db.ExecSQL("CREATE TABLE IF NOT EXISTS NotifyTable (" + START_ID + " INTEGER, " + NEW_ID + " INTEEGER)");
+           
 
         }
-        public long getNotifyId()
-        {
-            long id = 1;
-            cursor = WritableDatabase.RawQuery("Select "+START_ID+" from " + Databasehelper.NOTIFYTABLE + " ORDER BY "+ START_ID+" DESC LIMIT 1", null);
-            if (cursor.MoveToFirst())
-            {
-                id = cursor.GetLong(0);
-                cursor.Close();
-                id++;
-            }
-            return id;
-        }
+      
         public void SaveBitmapBase(long id,string path,int start,int end,Bitmap image) //SAVE IMAGE IN DB
         {
            
@@ -71,9 +59,12 @@ namespace App13
          }
         public  long SaveText(IEditable Text,Bundle args)
         {
+           
             long NoteNumber = 0;
+            string date = DateTime.Now.ToString("dd MMM yyyyг. HH:mm");
             ContentValues cv = new ContentValues();
             cv.Put(Databasehelper.COLUMN_TEXT, Text.ToString());
+            cv.Put(Databasehelper.COLUMN_EDITINGTIME, date);
             if (args != null)
             {
                 WritableDatabase.Update(Databasehelper.TEXTTABLE, cv, "_id == ?", new string[] { args.GetString(Databasehelper.COLUMN_ID) });
@@ -115,6 +106,7 @@ namespace App13
             }
             return NoteNumber;
         }
+      
         public Bitmap ReturnDrawableBase(long id,string path)
         {
             string[] col = { "ColumnBitmap" };

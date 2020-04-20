@@ -22,7 +22,7 @@ using Android.Preferences;
 
 namespace App13
 {
-    [Activity(Label = "WriteActivity")]
+    [Activity(Label = "WriteActivity", Theme = "@style/AppTheme.NoActionBar")]
     public class WriteActivity : AppCompatActivity
     {
 
@@ -34,6 +34,7 @@ namespace App13
         ICursor cursor;
         ImageButton ImgBut;
         ImageButton SaveBut;
+        ImageButton ShareBut;
         private Bundle Args;
         ImageButton Notification;
         ISharedPreferences Shared;
@@ -55,14 +56,15 @@ namespace App13
             SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             //setviews
-            
 
+            ShareBut = FindViewById<ImageButton>(Resource.Id.share_but);
 
             SqlHelper = new Databasehelper(this);
             Db = SqlHelper.WritableDatabase;
             Notification.Click += SendNotify;
             ImgBut.Click += OnImageclick;
             SaveBut.Click += OnSaveClick;
+            ShareBut.Click += ShareClick;
             Shared = PreferenceManager.GetDefaultSharedPreferences(this);
             PrefsEditor = Shared.Edit();
             EditText.SetPadding(40, 10, 40, 10);
@@ -92,16 +94,28 @@ namespace App13
                 
 
         }
-        int ta = 1;
+       public void ShareClick(object sender,EventArgs e)
+        {
+            string a;
+            a = Html.ToHtml(EditText.EditableText,ToHtmlOptions.ParagraphLinesConsecutive);
+            Intent sharingIntent = new Intent(Android.Content.Intent.ActionSend);
+            sharingIntent.SetType("text/plain");
+            
+            string shareBody = EditText.Text;
+            sharingIntent.PutExtra(Android.Content.Intent.ExtraText, shareBody);
+            StartActivity(Intent.CreateChooser(sharingIntent, "Поделиться"));
+        }
         public void SendNotify(object sender, EventArgs e) //Create ntoification
         {
 
          
            
-            cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.NEW_ID }, Databasehelper.NEW_ID+" = ?", new string[] { notifyFragment.Id.ToString() }, null, null, null);
-                if (cursor.Count!=0)
+            cursor = Db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_NOTIFY },"_id = ?", new string[] { notifyFragment.Id.ToString() }, null, null, null);
+            cursor.MoveToFirst();
+                if (cursor.Count!=0&&cursor.GetInt(0)==1)
             {
-               Dialog dialog = CreateAlertAlarm();
+               
+               Dialog dialog = CreateAlertAlarm(notifyFragment.GetTime(this, notifyFragment.Id));
                 dialog.Show();
 
             }
@@ -128,14 +142,14 @@ namespace App13
            
         }
 
-        public Android.Support.V7.App.AlertDialog CreateAlertAlarm()
+        public Android.Support.V7.App.AlertDialog CreateAlertAlarm(string[] timeAndDate)
         {
             Android.Support.V7.App.AlertDialog.Builder builder = new Android.Support.V7.App.AlertDialog.Builder(this);
             builder.SetTitle("Напоминание уже установлено.");
-            builder.SetMessage("Хотите удалить старое напоминание?");
+            builder.SetMessage("Напоминание произойдет:" + "\n" + timeAndDate[0] + "\n" + "в " + timeAndDate[1]);
             builder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
             builder.SetNegativeButton("Выйти", (sender, args) => { });
-            builder.SetPositiveButton("Удалить", (sender, args) => { notifyFragment.CancelAlarm(this); Db.Delete(Databasehelper.NOTIFYTABLE, Databasehelper.NEW_ID + " = ?", new string[] { notifyFragment.Id.ToString() }); Toast s = Toast.MakeText(this, "Напоминане удалено", ToastLength.Long); s.Show(); ;
+            builder.SetPositiveButton("Удалить", (sender, args) => { notifyFragment.CancelAlarm(this);ContentValues cv = new ContentValues(); cv.Put(Databasehelper.COLUMN_NOTIFY, 0); Db.Update(Databasehelper.TEXTTABLE,cv, "_id= ?", new string[] { notifyFragment.Id.ToString() }); Toast s = Toast.MakeText(this, "Напоминане удалено", ToastLength.Long); s.Show(); ;
                 s.Show();
             });
             return builder.Create();

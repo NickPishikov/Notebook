@@ -141,9 +141,7 @@ namespace App13
       public  static int id = 1;
         public bool IsShow;
         public bool[] IsChecked;
-        CheckBox checkbox;
-        TextView textbox;
-        int Position;
+     
         Databasehelper SqlHelper;
         SQLiteDatabase Db;
         ICursor cursor1;
@@ -161,6 +159,8 @@ namespace App13
             string title;
             ViewHolder viewHolder;
             string[] nameNote = Cursor.GetString(Cursor.GetColumnIndex("ColumnText")).Split("\n");
+            int IsNotify = Cursor.GetInt(Cursor.GetColumnIndex(Databasehelper.COLUMN_NOTIFY));
+            
             SqlHelper = new Databasehelper(context);
             Db = SqlHelper.ReadableDatabase;
             if (convertView == null)
@@ -180,12 +180,14 @@ namespace App13
             }
             try
             {
-                cursor1 = Db.RawQuery(("select " + Databasehelper.COLUMN_IMGPATH + " from " + Databasehelper.CONTENTTABLE + " where _id == " + (position + 1).ToString()), null);
+                cursor1 = Db.RawQuery("select " + Databasehelper.COLUMN_IMGPATH + " from " + Databasehelper.CONTENTTABLE + " where _id == " + GetItemId(position).ToString(), null);
                 title = Multitools.GetNameNote(nameNote[0], cursor1);
             }
             catch { title = nameNote[0]; }
             viewHolder.namenotes.Text = title; //Set Title In List
-
+            if (IsNotify == 1) viewHolder.image.Visibility = ViewStates.Visible;
+            else viewHolder.image.Visibility = ViewStates.Invisible;
+            viewHolder.editingTime.Text = Cursor.GetString(Cursor.GetColumnIndex(Databasehelper.COLUMN_EDITINGTIME));
 
 
             if (IsShow)
@@ -212,11 +214,14 @@ namespace App13
 
            public TextView namenotes;
            public CheckBox checkBox;
+            public ImageView image;
+            public TextView editingTime;
             public ViewHolder(View view)
             {
                 namenotes = (TextView)view.FindViewById(Resource.Id.namenote);
                 checkBox = (CheckBox)view.FindViewById(Resource.Id.checknote);
-
+                image = (ImageView)view.FindViewById(Resource.Id.clock_notify);
+                editingTime = (TextView)view.FindViewById(Resource.Id.editing_time);
             }
         }
          
@@ -228,7 +233,7 @@ namespace App13
                 {
                     if (IsChecked[i])
                     {
-                        checkedpos.Add(i + 1);
+                        checkedpos.Add(i);
                     }
                 }
             NotifyDataSetChanged();

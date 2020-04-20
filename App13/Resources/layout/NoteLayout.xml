@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:fitsSystemWindows="true"
+    
    >
 
 
@@ -36,17 +36,23 @@
  <ScrollView
        android:layout_width="match_parent"
        android:layout_height="match_parent"
+       
        android:layout_below="@+id/toptable"
-       android:layout_above="@+id/botpanel">
+       android:layout_above="@+id/botpanel"
+        >
     <EditText       
         android:layout_width="match_parent"
         android:layout_height="match_parent"
             android:layout_marginTop="10dp"
         android:id="@+id/editText1"
+           
        android:inputType="textMultiLine"
         android:fontFamily="sans-serif"
        android:background="@null"
        android:textSize="25dp"
+      
+  
+        
       />
        
     </ScrollView>
@@ -60,7 +66,7 @@
         android:layout_marginTop="2dp"
         android:layout_centerHorizontal="true"
         android:id="@+id/botpanel"      
-     
+       
         >
     <ImageButton
         android:src="@drawable/setimg"
@@ -102,7 +108,7 @@
    />
            <ImageButton
        android:src="@drawable/share"
-        
+        android:id="@+id/share_but"
         android:layout_alignParentRight="true"
            style="@style/mystyle"
             android:layout_marginBottom="2dp"
