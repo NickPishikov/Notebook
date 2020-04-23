@@ -24,7 +24,7 @@ namespace App13
         public readonly static string COLUMN_END = "ColumnEnd";
         public readonly static string COLUMN_NOTIFY = "ColumnNotify";
         public readonly static string COLUMN_TIME = "ColumnTime";
-    
+        public readonly static string COLUMN_COLOR = "ColumnColor";
         public readonly static string NOTIFYTABLE = "NotifyTable";
         public readonly static string COLUMN_EDITINGTIME = "EditingTime";
         ICursor cursor;
@@ -35,7 +35,7 @@ namespace App13
         {
             db.ExecSQL("CREATE TABLE IF NOT EXISTS TextTable (" + COLUMN_ID
                     + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_TEXT //for listview
-                    + " TEXT," + COLUMN_NOTIFY +" BOOLEAN, "+ COLUMN_TIME + " INTEGER DEFAULT 0, " +COLUMN_EDITINGTIME+" TEXT)");
+                    + " TEXT," + COLUMN_NOTIFY +" BOOLEAN, "+ COLUMN_TIME + " INTEGER DEFAULT 0, " +COLUMN_EDITINGTIME+" TEXT, " + COLUMN_COLOR+" INTEGER DEFAULT -1)");
 
             db.ExecSQL("CREATE TABLE IF NOT EXISTS ContentTable (" + COLUMN_ID + " INTEGER, "+ COLUMN_IMGPATH + " TEXT, " +
                 COLUMN_START +" INTEGER, " +

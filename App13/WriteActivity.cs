@@ -12,6 +12,7 @@ using Java.Lang;
 using Android.Text.Style;
 using Android.Content;
 using Android.Graphics;
+
 using Android.Database;
 using Android.Database.Sqlite;
 using Android.Graphics.Drawables;

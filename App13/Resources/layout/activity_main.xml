@@ -53,7 +53,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_width="30dp"
                 android:layout_height="35dp"
-
+                android:src="@drawable/color_bucket"
             android:layout_marginTop="8dp"
             android:id="@+id/ColorBut"
             android:scaleType="fitXY"
@@ -61,7 +61,7 @@
             android:visibility="invisible"
             android:tint="@drawable/default_button_selector"/>
             
-        <ImageButton
+        <ImageButton  
               android:layout_width="30dp"
               android:layout_height="35dp"
                   android:layout_marginTop="8dp"
@@ -86,7 +86,7 @@
     android:choiceMode="multipleChoice"
         android:divider="@null"
       android:dividerHeight="10dp"
-       android:paddingHorizontal="10dp"
+      
     android:id="@+id/values"
       
     />

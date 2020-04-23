@@ -188,7 +188,8 @@ namespace App13
             if (IsNotify == 1) viewHolder.image.Visibility = ViewStates.Visible;
             else viewHolder.image.Visibility = ViewStates.Invisible;
             viewHolder.editingTime.Text = Cursor.GetString(Cursor.GetColumnIndex(Databasehelper.COLUMN_EDITINGTIME));
-
+            Color c = new Color(Cursor.GetInt(Cursor.GetColumnIndex(Databasehelper.COLUMN_COLOR)));
+            viewHolder.layout.SetBackgroundColor(c);
 
             if (IsShow)
             {
@@ -211,7 +212,7 @@ namespace App13
         
         private class ViewHolder : Java.Lang.Object
         {
-
+        public  LinearLayout layout;
            public TextView namenotes;
            public CheckBox checkBox;
             public ImageView image;
@@ -222,6 +223,7 @@ namespace App13
                 checkBox = (CheckBox)view.FindViewById(Resource.Id.checknote);
                 image = (ImageView)view.FindViewById(Resource.Id.clock_notify);
                 editingTime = (TextView)view.FindViewById(Resource.Id.editing_time);
+                layout = (LinearLayout)view.FindViewById(Resource.Id.back_layout);
             }
         }
          
