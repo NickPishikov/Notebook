@@ -21,4 +21,7 @@
     <item name="  android:layout_height">35dp</item>
   
   </style>
+<style name="richpanel">
+  
+</style>
 </resources>

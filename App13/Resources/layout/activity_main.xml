@@ -46,7 +46,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-         android:layout_alignParentRight="true">
+         android:layout_alignParentRight="true"
+            android:paddingRight="4dp">
  
             <ImageButton
          
@@ -58,7 +59,8 @@
             android:id="@+id/ColorBut"
             android:scaleType="fitXY"
             android:background="@null"
-            android:visibility="invisible"
+            android:visibility="visible"
+           android:layout_marginRight="10dp"
             android:tint="@drawable/default_button_selector"/>
             
         <ImageButton  
@@ -70,7 +72,7 @@
          android:src="@drawable/deleteimg"
     android:scaleType="fitXY"
             android:background="@null"
-            android:visibility="invisible"
+            android:visibility="visible"
           android:layout_alignParentRight="true"
                 android:tint="@drawable/default_button_selector"
             />
@@ -85,7 +87,7 @@
      android:layout_height="match_parent"
     android:choiceMode="multipleChoice"
         android:divider="@null"
-      android:dividerHeight="10dp"
+     
       
     android:id="@+id/values"
       

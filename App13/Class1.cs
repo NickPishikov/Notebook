@@ -9,6 +9,8 @@ using Android.Database;
 using Android.Database.Sqlite;
 using Android.App;
 using Android.OS;
+using Android.Text.Style;
+using Android.Text;
 using System;
 
 namespace App13
@@ -95,13 +97,13 @@ namespace App13
             bm.Recycle();
             return resizedBitmap;
         }
-        public static byte[] ConvertoBLob( Bitmap image)
+        public static byte[] ConvertoBLob(Bitmap image)
         {
             MemoryStream stream = new MemoryStream();
 
             image.Compress(Bitmap.CompressFormat.Jpeg, 50, stream);
-            
-           
+
+
             return stream.ToArray();
         }
         public static Bitmap ConvertToBitmap(byte[] bytearray)
@@ -110,12 +112,12 @@ namespace App13
             Bitmap BitmapResult = BitmapFactory.DecodeByteArray(bytearray, 0, bytearray.Length);
             return BitmapResult;
         }
-        public static string GetNameNote(string text,ICursor cursor1) //position +1
+        public static string GetNameNote(string text, ICursor cursor1) //position +1
         {
             string paths;
             while (cursor1.MoveToNext())
             {
-                 paths = cursor1.GetString(0);
+                paths = cursor1.GetString(0);
                 if (text == '[' + paths + ']')
                 {
                     return "Изображение";
@@ -124,11 +126,12 @@ namespace App13
             }
             return text;
         }
-            
-           
-           
-        }
-    
+
+
+
+
+    }
+
 
 
 
@@ -138,38 +141,39 @@ namespace App13
 
     class Listadapter : SimpleCursorAdapter
     {
-      public  static int id = 1;
+        public static int id = 1;
         public bool IsShow;
         public bool[] IsChecked;
-     
+
         Databasehelper SqlHelper;
         SQLiteDatabase Db;
         ICursor cursor1;
         Context context;
+        ViewHolder viewHolder;
         public Listadapter(Context context, int layout, ICursor c, string[] from, int[] to, [GeneratedEnum] CursorAdapterFlags flags) : base(context, layout, c, from, to, flags)
         {
             this.context = context;
             IsChecked = new bool[Cursor.Count];
             cursor1 = c;
         }
-        
+
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             base.GetView(position, convertView, parent);
             string title;
-            ViewHolder viewHolder;
-            string[] nameNote = Cursor.GetString(Cursor.GetColumnIndex("ColumnText")).Split("\n");
+           
+            string[] nameNote = Html.FromHtml(Cursor.GetString(Cursor.GetColumnIndex("ColumnText")),FromHtmlOptions.ModeCompact).ToString().Split("\n");
             int IsNotify = Cursor.GetInt(Cursor.GetColumnIndex(Databasehelper.COLUMN_NOTIFY));
-            
+
             SqlHelper = new Databasehelper(context);
             Db = SqlHelper.ReadableDatabase;
             if (convertView == null)
             {
                 convertView = View.Inflate(context, Resource.Layout.activity_rows, null);
                 Cursor.MoveToPosition(position);
-                
+
                 viewHolder = new ViewHolder(convertView);
-             
+
 
                 convertView.Tag = viewHolder;
             }
@@ -200,21 +204,22 @@ namespace App13
                 viewHolder.checkBox.Visibility = ViewStates.Invisible;
             }
 
-             if (IsShow) viewHolder.checkBox.Checked = IsChecked[position];
+            if (IsShow) viewHolder.checkBox.Checked = IsChecked[position];
             if (!viewHolder.checkBox.HasOnClickListeners)
                 viewHolder.checkBox.Click += (sender, e) =>
                 {
                     IsChecked[position] = !IsChecked[position];
-                   
+
                 };
             return convertView;
         }
-        
+       
+
         private class ViewHolder : Java.Lang.Object
         {
-        public  LinearLayout layout;
-           public TextView namenotes;
-           public CheckBox checkBox;
+            public LinearLayout layout;
+            public TextView namenotes;
+            public CheckBox checkBox;
             public ImageView image;
             public TextView editingTime;
             public ViewHolder(View view)
@@ -226,35 +231,39 @@ namespace App13
                 layout = (LinearLayout)view.FindViewById(Resource.Id.back_layout);
             }
         }
-         
 
-            public List<int> GetChecked()
+
+        public List<int> GetChecked()
+        {
+            List<int> checkedpos = new List<int>();
+            for (int i = 0; i < IsChecked.Length; i++)
             {
-                List<int> checkedpos = new List<int>();
-                for (int i = 0; i < IsChecked.Length; i++)
+                if (IsChecked[i])
                 {
-                    if (IsChecked[i])
-                    {
-                        checkedpos.Add(i);
-                    }
+                    checkedpos.Add(i);
                 }
+            }
             NotifyDataSetChanged();
             return checkedpos;
-            
-        }
-            public void IsShowCheckbox(bool show)
-            {
 
-                IsShow = show;
-                if (IsShow) IsChecked = new bool[Cursor.Count];
-                System.Array.Fill<bool>(IsChecked, false); //сбрасываем для нового использования
-                this.ChangeCursor(Cursor);
-                NotifyDataSetChanged();
-            }
-            public void ChangeChecked(int position)
-            {
-                IsChecked[position] = !IsChecked[position];
-                NotifyDataSetChanged();
-            }
+        }
+        public void IsShowCheckbox(bool show)
+        {
+
+            IsShow = show;
+            if (IsShow) IsChecked = new bool[Cursor.Count];
+            System.Array.Fill<bool>(IsChecked, false);
+          //  IsChecked[position] = true;//сбрасываем для нового использования
+            this.ChangeCursor(Cursor);
+            NotifyDataSetChanged();
+        }
+       
+        public void ChangeChecked(int position)
+        {
+            IsChecked[position] = !IsChecked[position];
+      
+            NotifyDataSetChanged();
         }
     }
+   
+}

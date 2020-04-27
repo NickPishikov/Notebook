@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Android.App;
 using Android.OS;
@@ -11,7 +9,6 @@ using Android.Widget;
 using Android.Content;
 using Android.Database;
 using Android.Database.Sqlite;
-using Android.Preferences;
 using Net.ArcanaStudio.ColorPicker;
 using Android.Graphics;
 
@@ -24,16 +21,14 @@ namespace App13
         Databasehelper sqlHelper;
         SQLiteDatabase db;
         ImageButton addToList;
+       
         ImageButton CancelBut;
         ImageButton DeleteBut;
         ImageButton ColorBut;
         Listadapter cursorAdapter;
         ICursor cursor;
         ListView list;
-        CheckBox checknotes;
-        ISharedPreferences Shared;
-        ISharedPreferencesEditor Editor;
-        ColorPickerDialog colorDialog;
+     
         private const int REQUEST_RETURN_NOTE = 1; //Возвращаемое значение текста
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -41,20 +36,19 @@ namespace App13
            
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
+            
             addToList = FindViewById<ImageButton>(Resource.Id.notebut);
             CancelBut =(ImageButton)FindViewById(Resource.Id.CancelBut);
             DeleteBut = (ImageButton)FindViewById(Resource.Id.DeleteBut);
             ColorBut = (ImageButton)FindViewById(Resource.Id.ColorBut);
+           
             list = (ListView)FindViewById(Resource.Id.values);
             list.RequestFocus();
             
             //views
             sqlHelper = new Databasehelper(this);
             db = sqlHelper.ReadableDatabase;
-            //   db.ExecSQL("DROP Table " + Databasehelper.CONTENTTABLE);
-            //  db.ExecSQL("DROP Table " + Databasehelper.TEXTTABLE);
-            //sql
-            //getcursor
+      
 
             cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + "," + Databasehelper.COLUMN_COLOR + " from " + Databasehelper.TEXTTABLE, null);
            
@@ -63,7 +57,7 @@ namespace App13
            
             cursorAdapter = new Listadapter(this, Resource.Layout.activity_rows,
                              cursor,headers, new int[] { Resource.Id.namenote}, 0);
-           
+    
             list.Adapter = cursorAdapter;
             ColorBut.Click += ColorClick;
             CancelBut.Click += (sender, e) =>
@@ -116,11 +110,13 @@ namespace App13
              };
             list.ItemLongClick += (sender, e) =>
              {
+                 cursorAdapter.ChangeChecked(e.Position);
                  addToList.Visibility = ViewStates.Invisible;
                  ColorBut.Visibility = ViewStates.Visible;
                  CancelBut.Visibility = ViewStates.Visible;
                  DeleteBut.Visibility = ViewStates.Visible; 
                  cursorAdapter.IsShowCheckbox(true);
+                 cursorAdapter.ChangeChecked(e.Position);
              };
             //listeners
         }
@@ -200,6 +196,7 @@ namespace App13
             CancelBut.Visibility = ViewStates.Gone;
             ColorBut.Visibility = ViewStates.Gone;
             addToList.Visibility = ViewStates.Visible;
+            cursorAdapter.IsShowCheckbox(false);
         }
     }
 }

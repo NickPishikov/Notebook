@@ -12,12 +12,13 @@ using Java.Lang;
 using Android.Text.Style;
 using Android.Content;
 using Android.Graphics;
-
+using Android.Support.Design.Widget;
 using Android.Database;
 using Android.Database.Sqlite;
 using Android.Graphics.Drawables;
 using Android.Support.V7.App;
 using Android.Support.V4.App;
+using Android.Support.V4;
 using AndroidX;
 using Android.Preferences;
 
@@ -26,16 +27,24 @@ namespace App13
     [Activity(Label = "WriteActivity", Theme = "@style/AppTheme.NoActionBar")]
     public class WriteActivity : AppCompatActivity
     {
-
+        ImageButton BoldBut;
+        ImageButton CursiveBut;
+        ImageButton CrossoutBut;
+        ImageButton CancelButPanel;
+        
+        LinearLayout MainPanel;
+        LinearLayout SettingsPanel;
         NotifyFragment notifyFragment;
         private EditText EditText;
         const int GALLERY_REQUEST = 1;
         Databasehelper SqlHelper;
         SQLiteDatabase Db;
         ICursor cursor;
+        StyleSpan typeface;
         ImageButton ImgBut;
         ImageButton SaveBut;
         ImageButton ShareBut;
+        ImageButton SettingsBut;
         private Bundle Args;
         ImageButton Notification;
         ISharedPreferences Shared;
@@ -43,8 +52,7 @@ namespace App13
         long NoteNumber = 0;
         public Dictionary<string, Bitmap> Images { get; set; } = new Dictionary<string, Bitmap>();
         public TextWatcher textWatcher;
-
-
+        
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
@@ -52,25 +60,14 @@ namespace App13
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.NoteLayout);
-            Notification = FindViewById<ImageButton>(Resource.Id.notification);
-            ImgBut = FindViewById<ImageButton>(Resource.Id.setimg);
-            SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
-            EditText = FindViewById<EditText>(Resource.Id.editText1);
-            //setviews
-
-            ShareBut = FindViewById<ImageButton>(Resource.Id.share_but);
-
+            Init();
             SqlHelper = new Databasehelper(this);
             Db = SqlHelper.WritableDatabase;
-            Notification.Click += SendNotify;
-            ImgBut.Click += OnImageclick;
-            SaveBut.Click += OnSaveClick;
-            ShareBut.Click += ShareClick;
-            Shared = PreferenceManager.GetDefaultSharedPreferences(this);
-            PrefsEditor = Shared.Edit();
+          
             EditText.SetPadding(40, 10, 40, 10);
-
-
+            
+         
+             
             textWatcher = new TextWatcher(EditText);
            
             EditText.AddTextChangedListener(textWatcher);
@@ -83,8 +80,8 @@ namespace App13
                 cursor = Db.RawQuery("Select * from " + Databasehelper.TEXTTABLE + " Where _id =="
                     + Args.GetString(Databasehelper.COLUMN_ID), null);
                 cursor.MoveToFirst();
-                string text = cursor.GetString(cursor.GetColumnIndex("ColumnText"));
-                EditText.Text = text;
+                ISpanned text = Html.FromHtml(cursor.GetString(cursor.GetColumnIndex("ColumnText")),FromHtmlOptions.ModeCompact);
+                EditText.SetText(text,EditText.BufferType.Editable);
                 cursor = Db.RawQuery("Select *" + " from " + Databasehelper.CONTENTTABLE
                     + " Where _id==" + Args.GetString(Databasehelper.COLUMN_ID), null);
                 setImages(cursor);
@@ -95,7 +92,147 @@ namespace App13
                 
 
         }
-       public void ShareClick(object sender,EventArgs e)
+        public void Init()
+        {
+            //layouts
+            SettingsPanel = (LinearLayout)FindViewById(Resource.Id.settings_panel);
+            MainPanel = (LinearLayout)FindViewById(Resource.Id.main_panel);
+            //buttons
+            Notification = FindViewById<ImageButton>(Resource.Id.notification);
+            ImgBut = FindViewById<ImageButton>(Resource.Id.setimg);
+            SaveBut = FindViewById<ImageButton>(Resource.Id.savebut);
+            EditText = FindViewById<EditText>(Resource.Id.editText1);
+            SettingsBut = (ImageButton)FindViewById(Resource.Id.settings);
+            ShareBut = FindViewById<ImageButton>(Resource.Id.share_but);
+            BoldBut = FindViewById<ToggleButton>(Resource.Id.bold_but);
+            CursiveBut = FindViewById<ToggleButton>(Resource.Id.cursive_but);
+            CrossoutBut = FindViewById<ToggleButton>(Resource.Id.crossout_but);
+            CancelButPanel = FindViewById<ImageButton>(Resource.Id.cancel_panel);
+            //events
+            Notification.Click += SendNotify;
+            ImgBut.Click += OnImageclick;
+            SaveBut.Click += OnSaveClick;
+            ShareBut.Click += ShareClick;
+            SettingsBut.Click += SettingsClick;
+            BoldBut.Click += BoldChange;
+            CursiveBut.Click += CursiveChange;
+            CrossoutBut.Click += CrossChange;
+            CancelButPanel.Click += CancelBut;
+        }
+        public void BoldChange(object sender,EventArgs e)
+        {
+            int start = EditText.SelectionStart;
+            int end = EditText.SelectionEnd;
+          //  if (BoldBut.Checked)
+                SetSpan(start, end, TypefaceStyle.Bold);
+          //  else 
+                DisableSpan(start, end, TypefaceStyle.Bold);
+        }
+        public void CursiveChange(object sender, EventArgs e)
+        {
+            int start = EditText.SelectionStart;
+            int end = EditText.SelectionEnd;
+          //  if (CursiveBut.Checked)
+                SetSpan(start, end, TypefaceStyle.Italic);
+         //   else
+                DisableSpan(start, end, TypefaceStyle.Italic);
+        }
+        public void CrossChange (object sender,EventArgs e)
+        {
+            int start = EditText.SelectionStart;
+            int end = EditText.SelectionEnd;
+           // if (CrossoutBut.Checked)
+                
+                SetSpan(start, end,new StrikethroughSpan());
+         //   else
+                DisableSpan(start, end, new StrikethroughSpan());
+        }
+        public void CancelBut(object sender,EventArgs e)
+        {
+            int start = EditText.SelectionStart;
+            MainPanel.Visibility = Android.Views.ViewStates.Visible;
+            SettingsPanel.Visibility = Android.Views.ViewStates.Gone;
+            DisableSpan(start, start, new StrikethroughSpan());
+            DisableSpan(start, start, TypefaceStyle.Bold);
+            DisableSpan(start, start, TypefaceStyle.Italic);
+        }
+        void DisableSpan(int start, int end, StrikethroughSpan span)
+        {
+            var spans = EditText.EditableText.GetSpans(start, end, Java.Lang.Class.FromType(typeof(StrikethroughSpan)));
+            for (int i = spans.Length - 1; i >= 0; i--)
+            {
+              
+                    int spanEnd = EditText.EditableText.GetSpanEnd(spans[i]);
+                    int spanStart = EditText.EditableText.GetSpanStart(spans[i]);
+                    EditText.EditableText.RemoveSpan(spans[i]);
+
+                    if (spanStart < start)
+                    {
+
+                        EditText.EditableText.SetSpan(span, spanStart, start, SpanTypes.ExclusiveExclusive);
+                    }
+                    if (spanEnd > end)
+                    {
+
+                        EditText.EditableText.SetSpan(span, end, spanEnd, SpanTypes.ExclusiveExclusive);
+                    }
+
+
+                }
+            }
+        
+        void SetSpan(int start,int end,StrikethroughSpan span)
+        {
+          
+            if (start == end)
+                EditText.EditableText.SetSpan(span, start, end, SpanTypes.InclusiveInclusive);
+            else
+                EditText.EditableText.SetSpan(span, start, end, SpanTypes.ExclusiveInclusive);
+        }
+        void SetSpan(int start,int end,TypefaceStyle typeface)
+        {
+            CharacterStyle span = new StyleSpan(typeface);
+            if (start == end)
+                EditText.EditableText.SetSpan(span,start, end, SpanTypes.InclusiveInclusive);
+            else
+                EditText.EditableText.SetSpan(span, start, end, SpanTypes.ExclusiveInclusive);
+        }
+        void DisableSpan(int start,int end,TypefaceStyle typeface)
+        {
+            var spans = EditText.EditableText.GetSpans(start, end, Java.Lang.Class.FromType(typeof(StyleSpan)));
+            for (int i = spans.Length - 1; i >= 0; i--)
+            {
+                if ((((StyleSpan)(spans[i])).Style) == typeface)
+                {
+                    int spanEnd = EditText.EditableText.GetSpanEnd(spans[i]);
+                    int spanStart = EditText.EditableText.GetSpanStart(spans[i]);
+                    EditText.EditableText.RemoveSpan(spans[i]);
+                 
+                    if (spanStart<start)
+                    {
+                        
+                        EditText.EditableText.SetSpan(new StyleSpan(typeface), spanStart,start, SpanTypes.ExclusiveExclusive);
+                    }
+                    if (spanEnd > end)
+                    {
+                       
+                        EditText.EditableText.SetSpan(new StyleSpan(typeface),end , spanEnd, SpanTypes.ExclusiveExclusive);
+                    }
+
+
+                }
+            }
+        }
+        public void SettingsClick(object sender,EventArgs e)
+        {
+
+         MainPanel.Visibility = Android.Views.ViewStates.Gone;
+          SettingsPanel.Visibility = Android.Views.ViewStates.Visible;
+        
+           
+
+        } //форматирование текста
+        public void ShareClick(object sender,EventArgs e) //Кнопка поделиться
         {
             string a;
             a = Html.ToHtml(EditText.EditableText,ToHtmlOptions.ParagraphLinesConsecutive);
@@ -299,8 +436,8 @@ namespace App13
                         EditText.EditableText.Insert(slend-1  , "\n");
                     }
                 }
-            } 
-
+            }
+            int a = 0;
             public void OnTextChanged(ICharSequence s, int start, int before, int count)
             {
 
@@ -317,13 +454,17 @@ namespace App13
                     spanStart = -1;
                     spanEnd = -1;
                     EditText.EditableText.Replace(startSpan, endSpan, "");
+                    
                 }
-
+               
+              
             }  //replace deleted spans
             public void BeforeTextChanged(ICharSequence s, int start, int count, int after)  //delete spans and insert spaces
              {
+    
                 try
                 {
+                    
                     var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
                     spanStart = -1;
                     spanEnd = -1;
@@ -331,7 +472,7 @@ namespace App13
                     slend = EditText.SelectionEnd;
 
                     
-                    if (span != null && Editing)
+                    if ((span != null||span.Length!=0) && Editing)
                     {
                        
                         if (count >after)

@@ -62,8 +62,22 @@ namespace App13
            
             long NoteNumber = 0;
             string date = DateTime.Now.ToString("dd MMM yyyyг. HH:mm");
+       
             ContentValues cv = new ContentValues();
-            cv.Put(Databasehelper.COLUMN_TEXT, Text.ToString());
+            SpannableFactory a = new SpannableFactory();
+           ISpannable saveText= a.NewSpannable(Text);
+           
+           
+            
+              
+            Java.Lang.Object[] span = saveText.GetSpans(0, saveText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
+            if (span != null)
+                for (int i = 0; i < span.Length; i++)
+                {
+                    saveText.RemoveSpan(span[i]);
+                }
+
+            cv.Put(Databasehelper.COLUMN_TEXT, Html.ToHtml(saveText,ToHtmlOptions.ParagraphLinesIndividual));
             cv.Put(Databasehelper.COLUMN_EDITINGTIME, date);
             if (args != null)
             {
@@ -88,20 +102,20 @@ namespace App13
                 NoteNumber = id;
               
             }
-            Java.Lang.Object[] span = Text.GetSpans(0, Text.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
+           Java.Lang.Object[] spans = Text.GetSpans(0, Text.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
             //Insert Image in Database
-            if (span != null)
+            if (spans != null)
             {
-                for (int i = 0; i < span.Length; i++)
+                for (int i = 0; i < spans.Length; i++)
                 {
-                    int start =Text.GetSpanStart(span[i]);
-                    int end = Text.GetSpanEnd(span[i]);
+                    int start =Text.GetSpanStart(spans[i]);
+                    int end = Text.GetSpanEnd(spans[i]);
                     string source;
 
                     source = Text.ToString().Substring(start + 1, end - start - 2);
+                  
 
-
-                   SaveBitmapBase(NoteNumber, source, start, end, ((BitmapDrawable)((ImageSpan)span[i]).Drawable).Bitmap);
+                   SaveBitmapBase(NoteNumber, source, start, end, ((BitmapDrawable)((ImageSpan)spans[i]).Drawable).Bitmap);
                 }
             }
             return NoteNumber;
