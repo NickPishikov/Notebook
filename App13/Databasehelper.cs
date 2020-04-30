@@ -76,14 +76,16 @@ namespace App13
                 {
                     saveText.RemoveSpan(span[i]);
                 }
-
-            cv.Put(Databasehelper.COLUMN_TEXT, Html.ToHtml(saveText,ToHtmlOptions.ParagraphLinesIndividual));
-            cv.Put(Databasehelper.COLUMN_EDITINGTIME, date);
+            if (Build.VERSION.SdkInt>=BuildVersionCodes.N)
+            cv.Put(COLUMN_TEXT, Html.ToHtml(saveText,ToHtmlOptions.ParagraphLinesIndividual));
+            else
+                cv.Put(COLUMN_TEXT, Html.ToHtml(saveText));
+            cv.Put(COLUMN_EDITINGTIME, date);
             if (args != null)
             {
-                WritableDatabase.Update(Databasehelper.TEXTTABLE, cv, "_id == ?", new string[] { args.GetString(Databasehelper.COLUMN_ID) });
-                WritableDatabase.ExecSQL("DELETE from " + Databasehelper.CONTENTTABLE + " Where _id == " + args.GetString(Databasehelper.COLUMN_ID)); //Delete old image
-                NoteNumber = Convert.ToInt32(args.GetString(Databasehelper.COLUMN_ID));
+                WritableDatabase.Update(TEXTTABLE, cv, "_id == ?", new string[] { args.GetString(Databasehelper.COLUMN_ID) });
+                WritableDatabase.ExecSQL("DELETE from " + CONTENTTABLE + " Where _id == " + args.GetString(Databasehelper.COLUMN_ID)); //Delete old image
+                NoteNumber = Convert.ToInt32(args.GetString(COLUMN_ID));
             }
             else
             {
@@ -97,8 +99,8 @@ namespace App13
                     cursor.Close();
                     id++;
                 }
-                cv.Put(Databasehelper.COLUMN_ID, id);
-                WritableDatabase.Insert(Databasehelper.TEXTTABLE, null, cv);
+                cv.Put(COLUMN_ID, id);
+                WritableDatabase.Insert(TEXTTABLE, null, cv);
                 NoteNumber = id;
               
             }

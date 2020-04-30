@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Android.Views;
 using Android.Support.V4.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Util;
 using Android.Text;
-using Java.Text;
 using Java.Util;
-using Java.Lang;
 using Android.Widget;
-using Android.Systems;
-using Android.Preferences;
 using Android.Database.Sqlite;
 using Android.Database;
 
@@ -24,10 +15,7 @@ namespace App13
    [BroadcastReceiver]
    public class  NotifyManager : BroadcastReceiver
     {
-        ISharedPreferences Shared;
-        ISharedPreferencesEditor PrefsEditor;
         Databasehelper databasehelper;
-        ICursor cursor;
         SQLiteDatabase Db;
         public override void OnReceive(Context context, Intent intent)
         {
@@ -155,7 +143,7 @@ namespace App13
         }
         void OnClickAccept(object sender,EventArgs e)
         {
-            if ((DateTime.Now.Date == Date && (DateTime.Now.Hour > Hour || DateTime.Now.Hour == Hour && DateTime.Now.Minute > Minute)) || DateTime.Now.Date > Date) //If current date, check hour is not less current hour, and if current date and hour, check minute
+            if ((DateTime.Now.Date == Date && (DateTime.Now.Hour > Hour || DateTime.Now.Hour == Hour && DateTime.Now.Minute >= Minute)) || DateTime.Now.Date > Date) //If current date, check hour is not less current hour, and if current date and hour, check minute
             {
                 Toast toast = Toast.MakeText(Context, "Нельзя установить прошедшее время или дату.", ToastLength.Short);
                 toast.Show();

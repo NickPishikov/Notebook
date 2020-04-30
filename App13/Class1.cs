@@ -156,13 +156,16 @@ namespace App13
             IsChecked = new bool[Cursor.Count];
             cursor1 = c;
         }
-
+        //изменить цвет фона
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             base.GetView(position, convertView, parent);
             string title;
-           
-            string[] nameNote = Html.FromHtml(Cursor.GetString(Cursor.GetColumnIndex("ColumnText")),FromHtmlOptions.ModeCompact).ToString().Split("\n");
+            string[] nameNote;
+           if (Build.VERSION.SdkInt >= BuildVersionCodes.N) 
+             nameNote = Html.FromHtml(Cursor.GetString(Cursor.GetColumnIndex("ColumnText")),FromHtmlOptions.ModeCompact).ToString().Split("\n");
+           else
+                nameNote = Html.FromHtml(Cursor.GetString(Cursor.GetColumnIndex("ColumnText"))).ToString().Split("\n");
             int IsNotify = Cursor.GetInt(Cursor.GetColumnIndex(Databasehelper.COLUMN_NOTIFY));
 
             SqlHelper = new Databasehelper(context);

@@ -14,7 +14,7 @@ using Android.Graphics;
 
 namespace App13
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
+    [Activity(Label = "SimpleNote", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity,IColorPickerDialogListener
     {
        
@@ -28,7 +28,7 @@ namespace App13
         Listadapter cursorAdapter;
         ICursor cursor;
         ListView list;
-     
+        private long LastClickTime = 0;
         private const int REQUEST_RETURN_NOTE = 1; //Возвращаемое значение текста
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -41,10 +41,11 @@ namespace App13
             CancelBut =(ImageButton)FindViewById(Resource.Id.CancelBut);
             DeleteBut = (ImageButton)FindViewById(Resource.Id.DeleteBut);
             ColorBut = (ImageButton)FindViewById(Resource.Id.ColorBut);
+            
            
             list = (ListView)FindViewById(Resource.Id.values);
             list.RequestFocus();
-            
+         
             //views
             sqlHelper = new Databasehelper(this);
             db = sqlHelper.ReadableDatabase;
@@ -62,6 +63,8 @@ namespace App13
             ColorBut.Click += ColorClick;
             CancelBut.Click += (sender, e) =>
             {
+                if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+                LastClickTime = SystemClock.ElapsedRealtime();
                 cursorAdapter.IsShowCheckbox(false);
                 CancelBut.Visibility = ViewStates.Invisible;
                 DeleteBut.Visibility = ViewStates.Invisible;
@@ -71,6 +74,7 @@ namespace App13
             };
             DeleteBut.Click += (sender, e) =>
               {
+                 
                   cursor = db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_ID }, Databasehelper.COLUMN_NOTIFY + "= ?", new string[] { "1" }, null, null, null);
                   List<int> checkedpos = cursorAdapter.GetChecked();
                   for (int i = 0; i < checkedpos.Count; i++)
@@ -96,6 +100,7 @@ namespace App13
             list.ItemClick += (sender, e) =>
              {
 
+               
                  if (cursorAdapter.IsShow)
                  {
                      cursorAdapter.ChangeChecked(e.Position);
@@ -103,14 +108,17 @@ namespace App13
                  }
                  else
                  {
+                     if (SystemClock.ElapsedRealtime() - LastClickTime < 800) return;
+                     LastClickTime = SystemClock.ElapsedRealtime();
                      Intent intent = new Intent(this, typeof(WriteActivity));
                      intent.PutExtra("_id", cursorAdapter.GetItemId(e.Position).ToString());
                      StartActivityForResult(intent, REQUEST_RETURN_NOTE);
                  }
+              
              };
             list.ItemLongClick += (sender, e) =>
              {
-                 cursorAdapter.ChangeChecked(e.Position);
+               
                  addToList.Visibility = ViewStates.Invisible;
                  ColorBut.Visibility = ViewStates.Visible;
                  CancelBut.Visibility = ViewStates.Visible;
@@ -128,10 +136,15 @@ namespace App13
         }
         void ColorClick(object sender,EventArgs e)
         {
-          ColorPickerDialog.NewBuilder().SetColor(Color.Red).SetDialogType(ColorPickerDialog.DialogType.Preset).SetAllowCustom(false).SetColorShape(ColorShape.Square).SetShowAlphaSlider(false).SetDialogId(1).Show(this);
+            if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+            LastClickTime = SystemClock.ElapsedRealtime();
+            ColorPickerDialog.NewBuilder().SetColor(Color.Red).SetDialogType(ColorPickerDialog.DialogType.Preset).SetAllowCustom(false).SetColorShape(ColorShape.Square).SetShowAlphaSlider(false).SetDialogId(1).Show(this);
         }
         void addToListClick(object sender, EventArgs e)
         {
+            if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+            LastClickTime = SystemClock.ElapsedRealtime();
+
             Intent intent = new Intent(this, typeof(WriteActivity));
         
             StartActivityForResult(intent,REQUEST_RETURN_NOTE);

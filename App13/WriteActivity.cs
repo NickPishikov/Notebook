@@ -1,8 +1,6 @@
 ﻿
-//Исправить баг при удалении
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
@@ -12,15 +10,10 @@ using Java.Lang;
 using Android.Text.Style;
 using Android.Content;
 using Android.Graphics;
-using Android.Support.Design.Widget;
 using Android.Database;
 using Android.Database.Sqlite;
-using Android.Graphics.Drawables;
 using Android.Support.V7.App;
-using Android.Support.V4.App;
-using Android.Support.V4;
-using AndroidX;
-using Android.Preferences;
+
 
 namespace App13
 {
@@ -40,19 +33,17 @@ namespace App13
         Databasehelper SqlHelper;
         SQLiteDatabase Db;
         ICursor cursor;
-        StyleSpan typeface;
+  
         ImageButton ImgBut;
         ImageButton SaveBut;
         ImageButton ShareBut;
         ImageButton SettingsBut;
         private Bundle Args;
         ImageButton Notification;
-        ISharedPreferences Shared;
-        ISharedPreferencesEditor PrefsEditor;
         long NoteNumber = 0;
         public Dictionary<string, Bitmap> Images { get; set; } = new Dictionary<string, Bitmap>();
         public TextWatcher textWatcher;
-        
+        private long LastClickTime = 0;
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
@@ -80,13 +71,19 @@ namespace App13
                 cursor = Db.RawQuery("Select * from " + Databasehelper.TEXTTABLE + " Where _id =="
                     + Args.GetString(Databasehelper.COLUMN_ID), null);
                 cursor.MoveToFirst();
-                ISpanned text = Html.FromHtml(cursor.GetString(cursor.GetColumnIndex("ColumnText")),FromHtmlOptions.ModeCompact);
+                ISpanned text;
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
+                     text = Html.FromHtml(cursor.GetString(cursor.GetColumnIndex("ColumnText")),FromHtmlOptions.ModeCompact);
+                else
+                     text = Html.FromHtml(cursor.GetString(cursor.GetColumnIndex("ColumnText")));
                 EditText.SetText(text,EditText.BufferType.Editable);
                 cursor = Db.RawQuery("Select *" + " from " + Databasehelper.CONTENTTABLE
                     + " Where _id==" + Args.GetString(Databasehelper.COLUMN_ID), null);
                 setImages(cursor);
                 notifyFragment.Id=NoteNumber;
             }
+            else { EditText.RequestFocus(); }
+          
            
            
                 
@@ -104,9 +101,9 @@ namespace App13
             EditText = FindViewById<EditText>(Resource.Id.editText1);
             SettingsBut = (ImageButton)FindViewById(Resource.Id.settings);
             ShareBut = FindViewById<ImageButton>(Resource.Id.share_but);
-            BoldBut = FindViewById<ToggleButton>(Resource.Id.bold_but);
-            CursiveBut = FindViewById<ToggleButton>(Resource.Id.cursive_but);
-            CrossoutBut = FindViewById<ToggleButton>(Resource.Id.crossout_but);
+            BoldBut = FindViewById<ImageButton>(Resource.Id.bold_but);
+            CursiveBut = FindViewById<ImageButton>(Resource.Id.cursive_but);
+            CrossoutBut = FindViewById<ImageButton>(Resource.Id.crossout_but);
             CancelButPanel = FindViewById<ImageButton>(Resource.Id.cancel_panel);
             //events
             Notification.Click += SendNotify;
@@ -118,37 +115,65 @@ namespace App13
             CursiveBut.Click += CursiveChange;
             CrossoutBut.Click += CrossChange;
             CancelButPanel.Click += CancelBut;
+            BoldBut.Background.Alpha = 0;
+            CursiveBut.Background.Alpha = 0;
+            CrossoutBut.Background.Alpha = 0;
+
         }
-        public void BoldChange(object sender,EventArgs e)
+        public void BoldChange(object sender, EventArgs e)
         {
+          //  BoldBut.Background.Mutate().SetAlpha(0);
             int start = EditText.SelectionStart;
             int end = EditText.SelectionEnd;
-          //  if (BoldBut.Checked)
+            if (BoldBut.Background.Alpha==0)
+            {
                 SetSpan(start, end, TypefaceStyle.Bold);
-          //  else 
+                BoldBut.Background.Alpha = 255;
+      
+                
+            }
+            else
+            {
                 DisableSpan(start, end, TypefaceStyle.Bold);
+                BoldBut.Background.Alpha = 0;
+
+            }
+            
         }
         public void CursiveChange(object sender, EventArgs e)
         {
             int start = EditText.SelectionStart;
             int end = EditText.SelectionEnd;
-          //  if (CursiveBut.Checked)
+            if (CursiveBut.Background.Alpha == 0)
+            {
                 SetSpan(start, end, TypefaceStyle.Italic);
-         //   else
+                CursiveBut.Background.Alpha = 255;
+            }
+            else
+            {
                 DisableSpan(start, end, TypefaceStyle.Italic);
+                CursiveBut.Background.Alpha = 0 ;
+            }
         }
         public void CrossChange (object sender,EventArgs e)
         {
             int start = EditText.SelectionStart;
             int end = EditText.SelectionEnd;
-           // if (CrossoutBut.Checked)
-                
-                SetSpan(start, end,new StrikethroughSpan());
-         //   else
+            if (CrossoutBut.Background.Alpha == 0)
+            {
+
+                SetSpan(start, end, new StrikethroughSpan());
+                CrossoutBut.Background.Alpha = 255;
+            }
+            else
+            {
                 DisableSpan(start, end, new StrikethroughSpan());
+                CrossoutBut.Background.Alpha = 0;
+            }
         }
         public void CancelBut(object sender,EventArgs e)
         {
+
             int start = EditText.SelectionStart;
             MainPanel.Visibility = Android.Views.ViewStates.Visible;
             SettingsPanel.Visibility = Android.Views.ViewStates.Gone;
@@ -234,6 +259,8 @@ namespace App13
         } //форматирование текста
         public void ShareClick(object sender,EventArgs e) //Кнопка поделиться
         {
+            if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+            LastClickTime = SystemClock.ElapsedRealtime();
             string a;
             a = Html.ToHtml(EditText.EditableText,ToHtmlOptions.ParagraphLinesConsecutive);
             Intent sharingIntent = new Intent(Android.Content.Intent.ActionSend);
@@ -246,8 +273,9 @@ namespace App13
         public void SendNotify(object sender, EventArgs e) //Create ntoification
         {
 
-         
-           
+            if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+            LastClickTime = SystemClock.ElapsedRealtime();
+
             cursor = Db.Query(Databasehelper.TEXTTABLE, new string[] { Databasehelper.COLUMN_NOTIFY },"_id = ?", new string[] { notifyFragment.Id.ToString() }, null, null, null);
             cursor.MoveToFirst();
                 if (cursor.Count!=0&&cursor.GetInt(0)==1)
@@ -325,6 +353,8 @@ namespace App13
        
         void OnSaveClick(object sender, EventArgs e) //SAVENOTES
         {
+            if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+            LastClickTime = SystemClock.ElapsedRealtime();
             string str = EditText.EditableText.ToString().Trim();
 
             if (notifyFragment.Args!=null)
@@ -359,6 +389,8 @@ namespace App13
         }
         void OnImageclick(object sender, EventArgs e) //open explorer 
         {
+            if (SystemClock.ElapsedRealtime() - LastClickTime < 1000) return;
+            LastClickTime = SystemClock.ElapsedRealtime();
             Intent photoPickerIntent = new Intent(Intent.ActionPick);
             photoPickerIntent.SetType("image/*");
             StartActivityForResult(photoPickerIntent, GALLERY_REQUEST);
@@ -377,20 +409,16 @@ namespace App13
                         Android.Net.Uri selectedImage = data.Data;
                         string Tag ='['+ selectedImage.LastPathSegment+']';
                         bitmap = Multitools.decodeSampledBitmapFromUri(this, selectedImage, 2000, 2000);
-                        bitmap = Multitools.getResizedBitmap(bitmap, 1000, 1000);
+                        bitmap = Multitools.getResizedBitmap(bitmap,Resources.DisplayMetrics.WidthPixels-100, Resources.DisplayMetrics.WidthPixels-100);
                      
                         var imageSpan = new ImageSpan(this, bitmap); //Find your drawable.
-                      
                         int selStart = EditText.SelectionEnd;
                         var span = EditText.EditableText.GetSpans(0, EditText.Length(), Java.Lang.Class.FromType(typeof(ImageSpan)));
-                      
-
                         ISpannable spann = SpannableFactory.Instance.NewSpannable(Tag);
                         spann.SetSpan(imageSpan, 0, Tag.Length, SpanTypes.ExclusiveExclusive);
                         if (selStart!=0)
                         EditText.EditableText.Insert(selStart, "\n");
                         selStart = EditText.SelectionEnd;
-                        
                         EditText.EditableText.Insert(selStart,spann);
                         textWatcher.Editing = false;
                         EditText.EditableText.Insert(selStart + Tag.Length, "\n");
