@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.companyname.app13" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
-	<application android:allowBackup="true" android:icon="@mipmap/note_ic" android:label="SimpleNote" android:supportsRtl="true" android:theme="@style/AppTheme">
+	<application android:allowBackup="true" android:icon="@mipmap/note" android:label="SimpleNote" android:supportsRtl="true" android:theme="@style/AppTheme">
 		<activity android:name="activity_main"></activity>
 		<activity android:name="NoteLayout" android:theme="@android:style/Theme.Black.NoTitleBar"></activity>
 		<receiver android:name=".NotifyManager" android:enabled="true"></receiver>

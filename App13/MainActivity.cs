@@ -87,14 +87,14 @@ namespace App13
                       if(cursor.GetInt(0)==1)
                       a.CancelAlarm(this, cursorAdapter.GetItemId(checkedpos[i]));       
                   }
-
-                  cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + "," + Databasehelper.COLUMN_COLOR + " from " + Databasehelper.TEXTTABLE, null);
-                  cursorAdapter.ChangeCursor(cursor);
-                  cursorAdapter.IsShowCheckbox(false);
                   DeleteBut.Visibility = ViewStates.Gone;
                   CancelBut.Visibility = ViewStates.Gone;
                   ColorBut.Visibility = ViewStates.Gone;
                   addToList.Visibility = ViewStates.Visible;
+                  cursor = db.RawQuery("select ColumnText,_id," + Databasehelper.COLUMN_NOTIFY + "," + Databasehelper.COLUMN_EDITINGTIME + "," + Databasehelper.COLUMN_COLOR + " from " + Databasehelper.TEXTTABLE, null);
+                  cursorAdapter.ChangeCursor(cursor);
+                  cursorAdapter.IsShowCheckbox(false);
+                
               };
             addToList.Click += addToListClick;
             list.ItemClick += (sender, e) =>

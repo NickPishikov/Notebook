@@ -9,7 +9,6 @@ using Android.Database;
 using Android.Database.Sqlite;
 using Android.App;
 using Android.OS;
-using Android.Text.Style;
 using Android.Text;
 using System;
 
@@ -256,7 +255,6 @@ namespace App13
             IsShow = show;
             if (IsShow) IsChecked = new bool[Cursor.Count];
             System.Array.Fill<bool>(IsChecked, false);
-          //  IsChecked[position] = true;//сбрасываем для нового использования
             this.ChangeCursor(Cursor);
             NotifyDataSetChanged();
         }

@@ -24,9 +24,7 @@ namespace App13
             databasehelper = new Databasehelper(context);
           
                 Db = databasehelper.WritableDatabase;
-                //cursor = Db.Query(Databasehelper.NOTIFYTABLE, new string[] { Databasehelper.NEW_ID }, Databasehelper.START_ID + " = ?", new string[] { intent.GetLongExtra("_id", 0).ToString() }, null, null, null);
-                //cursor.MoveToFirst();
-                // a = cursor.GetLong(0);
+              
                  resultIntent = new Intent(context, typeof(WriteActivity));
                 resultIntent.PutExtra("_id",id.ToString());
 
